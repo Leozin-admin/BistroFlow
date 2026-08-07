@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Criar conta — BistroFlow</title>
+  <meta name="description" content="Crie sua conta BistroFlow grátis por 14 dias." />
+  <link rel="canonical" href="https://leozin-admin.github.io/BistroFlow/cadastro.html" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/reset.css" />
+  <link rel="stylesheet" href="assets/css/variables.css" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/animations.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <link rel="stylesheet" href="assets/css/auth.css" />
+  <link rel="stylesheet" href="assets/css/responsive.css" />
+</head>
+<body>
+  <main class="auth">
+    <aside class="auth__brand">
+      <div class="auth__brand-top">
+        <a href="index.html" class="nav__brand">
+          <span class="brand__mark"><span class="brand__dot"></span></span>
+          <span class="brand__text">BistroFlow</span>
+        </a>
+        <h1 class="auth__title">14 dias <em>grátis</em>. Sem cartão.</h1>
+        <p class="auth__sub">Em 15 minutos o Bistro já está atendendo seu primeiro cliente.</p>
+      </div>
+      <div class="auth__brand-bot">
+        <ul class="auth__features">
+          <li>Configuração guiada em 15 minutos</li>
+          <li>Suporte humano durante o trial</li>
+          <li>Cancele com 1 clique, sem multa</li>
+        </ul>
+      </div>
+    </aside>
+
+    <section class="auth__form-wrap">
+      <div class="auth__form-inner">
+        <h2 class="auth__heading">Criar sua conta</h2>
+        <p class="auth__sub2">Já tem conta? <a href="login.html">Entrar →</a></p>
+
+        <div class="auth__msg" id="authMsg"></div>
+
+        <form class="auth__form" id="signupForm" novalidate>
+          <div class="field">
+            <label for="name">Seu nome</label>
+            <input type="text" id="name" required autocomplete="name" placeholder="Como você se chama?" />
+          </div>
+          <div class="field">
+            <label for="restaurant">Nome do restaurante</label>
+            <input type="text" id="restaurant" required placeholder="Ex: Forno a Lenha" />
+          </div>
+          <div class="field">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" required autocomplete="email" placeholder="seu@email.com" />
+          </div>
+          <div class="field">
+            <label for="phone">WhatsApp (opcional)</label>
+            <input type="tel" id="phone" autocomplete="tel" placeholder="(11) 99999-9999" />
+          </div>
+          <div class="field">
+            <label for="password">Senha</label>
+            <input type="password" id="password" required minlength="6" autocomplete="new-password" placeholder="Mínimo 6 caracteres" />
+          </div>
+          <label class="checkbox">
+            <input type="checkbox" id="terms" required />
+            <span style="font-size:13px; color:var(--ink-soft)">
+              Concordo com os <a href="termos.html">Termos</a> e a <a href="politica-privacidade.html">Privacidade</a>.
+            </span>
+          </label>
+          <button type="submit" class="btn btn--primary btn--lg" style="justify-content:center">
+            Criar conta grátis <span class="arrow">→</span>
+          </button>
+        </form>
+
+        <p class="auth__foot">Ao criar, você ganha 14 dias de Salão grátis. <a href="index.html#pricing">Ver planos</a></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/supabaseClient.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script>
+    (function () {
+      const form = $('#signupForm');
+      const msg  = $('#authMsg');
+      const btn  = form.querySelector('button[type="submit"]');
+      const show = (text, type) => {
+        msg.textContent = text;
+        msg.className = `auth__msg is-show auth__msg--${type}`;
+      };
+      const busy = (on) => {
+        btn.disabled = on;
+        btn.style.opacity = on ? '0.7' : '';
+        btn.style.pointerEvents = on ? 'none' : '';
+      };
+
+      // já logado? manda pro dashboard
+      Auth.getSession().then((s) => {
+        if (s) window.location.href = 'dashboard.html';
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+          name:       form.name.value.trim(),
+          restaurant: form.restaurant.value.trim(),
+          email:      form.email.value.trim(),
+          phone:      form.phone.value.trim(),
+          password:   form.password.value
+        };
+        if (!data.name || !data.email || !data.password || !data.restaurant) {
+          show('Preencha todos os campos obrigatórios.', 'err'); return;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+          show('E-mail inválido.', 'err'); return;
+        }
+        if (!form.terms.checked) { show('Você precisa aceitar os termos.', 'err'); return; }
+
+        busy(true);
+        const r = await Auth.signup(data);
+        busy(false);
+
+        if (!r.ok) {
+          if (r.needsEmailConfirm) {
+            show(r.error + ' Você será redirecionado para o login.', 'ok');
+            setTimeout(() => window.location.href = 'login.html', 2500);
+          } else {
+            show(r.error, 'err');
+          }
+          return;
+        }
+        show('Conta criada! Entrando...', 'ok');
+        setTimeout(() => window.location.href = 'dashboard.html', 700);
+      });
+    })();
+  </script>
+</body>
+</html>

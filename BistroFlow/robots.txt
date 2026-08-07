@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard.html
+Disallow: /admin/
+
+Sitemap: https://leozin-admin.github.io/BistroFlow/sitemap.xml
