@@ -1,0 +1,88 @@
+/* variables.css — design tokens (paleta inspirada em cartage.ai: minimalista, 1 cor de destaque) */
+:root {
+  /* Cores — base off-white quente + acento laranja-âmbar (food-friendly) */
+  --bg:            #FAF8F4;
+  --bg-elev:       #FFFFFF;
+  --bg-soft:       #F2EFE9;
+  --bg-dark:       #0E0E0C;
+  --bg-dark-soft:  #161613;
+
+  --ink:           #0E0E0C;
+  --ink-soft:      #4A4A45;
+  --ink-mute:      #8A8780;
+  --ink-faint:     #C9C5BC;
+
+  --line:          rgba(14, 14, 12, 0.10);
+  --line-soft:     rgba(14, 14, 12, 0.06);
+  --line-dark:     rgba(255, 255, 255, 0.10);
+
+  --accent:        #FF5B1F;       /* laranja-âmbar quente */
+  --accent-soft:   #FFB089;
+  --accent-deep:   #C73E0B;
+  --accent-ink:    #0E0E0C;
+
+  --ok:            #1F9D55;
+  --warn:          #E4A700;
+  --bad:           #D23A2C;
+
+  /* Tipografia */
+  --font-sans:     'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-serif:    'Fraunces', Georgia, "Times New Roman", serif;
+
+  /* Escala tipográfica fluida */
+  --fs-xs:   clamp(0.75rem, 0.72rem + 0.15vw, 0.85rem);
+  --fs-sm:   clamp(0.85rem, 0.82rem + 0.2vw, 0.95rem);
+  --fs-base: clamp(0.95rem, 0.9rem + 0.3vw, 1.075rem);
+  --fs-md:   clamp(1.05rem, 0.98rem + 0.4vw, 1.2rem);
+  --fs-lg:   clamp(1.25rem, 1.1rem + 0.8vw, 1.6rem);
+  --fs-xl:   clamp(1.6rem,  1.3rem + 1.6vw,  2.2rem);
+  --fs-2xl:  clamp(2rem,    1.6rem + 2.4vw,  3.2rem);
+  --fs-3xl:  clamp(2.6rem,  2rem   + 4vw,    4.8rem);
+  --fs-4xl:  clamp(3.2rem,  2.4rem + 5.5vw,  6.2rem);
+
+  /* Espaçamento */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  24px;
+  --sp-6:  32px;
+  --sp-7:  48px;
+  --sp-8:  64px;
+  --sp-9:  96px;
+  --sp-10: 128px;
+
+  /* Bordas e raios */
+  --r-sm:  6px;
+  --r-md:  10px;
+  --r-lg:  16px;
+  --r-xl:  24px;
+  --r-pill: 999px;
+
+  /* Sombras */
+  --shadow-sm: 0 1px 2px rgba(14, 14, 12, 0.06), 0 1px 1px rgba(14, 14, 12, 0.04);
+  --shadow-md: 0 6px 24px rgba(14, 14, 12, 0.08), 0 2px 6px rgba(14, 14, 12, 0.04);
+  --shadow-lg: 0 24px 60px rgba(14, 14, 12, 0.10), 0 8px 18px rgba(14, 14, 12, 0.05);
+  --shadow-glow: 0 0 0 1px rgba(255, 91, 31, 0.20), 0 18px 60px rgba(255, 91, 31, 0.18);
+
+  /* Layout */
+  --container: 1200px;
+  --container-narrow: 880px;
+  --nav-h: 72px;
+
+  /* Transições */
+  --ease:      cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:   cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --t-fast:    180ms;
+  --t-base:    320ms;
+  --t-slow:    600ms;
+
+  /* Motion preference */
+  --reduce-motion: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --reduce-motion: 1; }
+}

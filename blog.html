@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog — BistroFlow</title>
+  <meta name="description" content="Dicas, cases e novidades sobre automação de restaurantes." />
+  <link rel="canonical" href="https://leozin-admin.github.io/BistroFlow/blog.html" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400;1,9..144,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/reset.css" />
+  <link rel="stylesheet" href="assets/css/variables.css" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/animations.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <link rel="stylesheet" href="assets/css/sections.css" />
+  <link rel="stylesheet" href="assets/css/responsive.css" />
+  <style>
+    .blog-hero { padding: calc(var(--nav-h) + var(--sp-9)) 0 var(--sp-7); text-align: center; }
+    .blog-hero h1 { font-size: var(--fs-3xl); font-weight: 700; letter-spacing: -0.035em; line-height: 1.05; margin-bottom: var(--sp-4); }
+    .blog-hero p { color: var(--ink-soft); max-width: 560px; margin: 0 auto; font-size: var(--fs-md); }
+    .blog-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-5); padding-bottom: var(--sp-9); }
+    .post {
+      background: var(--bg-elev);
+      border: 1px solid var(--line);
+      border-radius: var(--r-xl);
+      overflow: hidden;
+      transition: transform 400ms var(--ease), box-shadow 400ms var(--ease);
+      display: flex; flex-direction: column;
+    }
+    .post:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .post__cover {
+      height: 180px;
+      background: linear-gradient(135deg, var(--accent-soft), var(--accent));
+      position: relative;
+      display: flex; align-items: end; padding: var(--sp-4);
+    }
+    .post__cover--1 { background: linear-gradient(135deg, #FFD3A5, var(--accent)); }
+    .post__cover--2 { background: linear-gradient(135deg, #B5FFFC, #FFDEE9); }
+    .post__cover--3 { background: linear-gradient(135deg, #C2E9FB, var(--accent-soft)); }
+    .post__cover--4 { background: linear-gradient(135deg, #FBC2EB, #A6C1EE); }
+    .post__cover--5 { background: linear-gradient(135deg, #FAD0C4, #FFD1FF); }
+    .post__cover--6 { background: linear-gradient(135deg, #A1C4FD, #C2E9FB); }
+    .post__cover-icon { font-size: 3rem; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.7; }
+    .post__tag { display: inline-block; background: rgba(0,0,0,0.7); color: #fff; padding: 4px 10px; border-radius: var(--r-pill); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+    .post__body { padding: var(--sp-5); display: flex; flex-direction: column; flex: 1; }
+    .post__date { font-size: 12px; color: var(--ink-mute); margin-bottom: var(--sp-2); }
+    .post__title { font-size: var(--fs-lg); font-weight: 700; letter-spacing: -0.02em; margin-bottom: var(--sp-3); line-height: 1.25; }
+    .post__excerpt { color: var(--ink-soft); font-size: var(--fs-sm); line-height: 1.6; margin-bottom: var(--sp-4); flex: 1; }
+    .post__read { font-size: var(--fs-sm); font-weight: 600; color: var(--ink); display: inline-flex; align-items: center; gap: 4px; }
+    .post__read:hover { color: var(--accent-deep); }
+  </style>
+</head>
+<body>
+  <header class="nav" id="nav">
+    <div class="nav__inner container">
+      <a href="index.html" class="nav__brand">
+        <span class="brand__mark"><span class="brand__dot"></span></span>
+        <span class="brand__text">BistroFlow</span>
+      </a>
+      <nav class="nav__links">
+        <a href="index.html#features">Recursos</a>
+        <a href="index.html#pricing">Preços</a>
+        <a href="blog.html">Blog</a>
+      </nav>
+      <div class="nav__cta">
+        <a href="login.html" class="btn btn--ghost">Entrar</a>
+        <a href="cadastro.html" class="btn btn--primary">Criar conta <span class="arrow">→</span></a>
+      </div>
+      <button class="nav__burger" id="navBurger" aria-label="Abrir menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="blog-hero">
+      <div class="container">
+        <span class="kicker">Blog BistroFlow</span>
+        <h1>Ideias, cases e táticas<br /><span class="serif italic">pra quem manda na cozinha</span></h1>
+        <p>Tudo o que a gente aprende rodando mais de 1.200 restaurantes, escrito pra quem está no balcão.</p>
+      </div>
+    </section>
+
+    <section class="container">
+      <div class="blog-grid" id="blogGrid"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__grid">
+      <div>
+        <a href="index.html" class="nav__brand">
+          <span class="brand__mark"><span class="brand__dot"></span></span>
+          <span class="brand__text">BistroFlow</span>
+        </a>
+        <p class="footer__tag">A última IA que seu restaurante vai contratar.</p>
+      </div>
+      <div>
+        <h4>Produto</h4>
+        <ul>
+          <li><a href="index.html#features">Recursos</a></li>
+          <li><a href="index.html#pricing">Preços</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Empresa</h4>
+        <ul>
+          <li><a href="blog.html">Blog</a></li>
+          <li><a href="#">Sobre</a></li>
+          <li><a href="#">Contato</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="termos.html">Termos</a></li>
+          <li><a href="politica-privacidade.html">Privacidade</a></li>
+          <li><a href="cookies.html">Cookies</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container footer__bottom">
+      <small>© 2026 BistroFlow · Feito com ☕ e <span class="serif italic">carinho</span>.</small>
+    </div>
+  </footer>
+
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/animations.js"></script>
+  <script src="assets/js/navigation.js"></script>
+  <script>
+    const posts = [
+      { tag: 'Atendimento', date: '5 ago 2026', title: 'Como responder 200 pedidos/hora sem contratar ninguém', excerpt: 'O segredo não é velocidade — é padrão. Veja como estruturar respostas que vendem.', cover: '💬', coverClass: 'post__cover--1', slug: 'como-responder-200-pedidos' },
+      { tag: 'Cardápio',    date: '28 jul 2026', title: '5 itens invisíveis no seu cardápio que estão matando seu ticket médio', excerpt: 'A maioria dos donos perde 20% do faturamento por erros simples. Veja os principais.', cover: '📋', coverClass: 'post__cover--2', slug: '5-itens-invisiveis' },
+      { tag: 'Cozinha',     date: '20 jul 2026', title: 'O método 80/20 da cozinha: 20% dos pratos dão 80% do lucro', excerpt: 'Descobrimos que a maioria dos restaurantes tem 6 pratos "patos feios" sangrando o caixa.', cover: '🍳', coverClass: 'post__cover--3', slug: 'metodo-80-20' },
+      { tag: 'Marketing',   date: '12 jul 2026', title: 'Por que disparar cupom todo dia quebra seu restaurante (e o que fazer)', excerpt: 'A frequência certa, o canal certo, o público certo. Dados de 1.200 casas.', cover: '📣', coverClass: 'post__cover--4', slug: 'frequencia-cupons' },
+      { tag: 'Cases',       date: '4 jul 2026', title: 'Como a Sushi Hara subiu 28% o ticket médio em 60 dias', excerpt: 'Um case real, com prints, números e o script de upsell que a IA passou a sugerir.', cover: '🍣', coverClass: 'post__cover--5', slug: 'sushi-hara-case' },
+      { tag: 'Operação',    date: '27 jun 2026', title: 'Lista de compras automática: o fim do "faltou cebola"', excerpt: 'Como prever demanda por dia da semana, evento local e até previsão do tempo.', cover: '🧾', coverClass: 'post__cover--6', slug: 'lista-compras' }
+    ];
+
+    const grid = document.getElementById('blogGrid');
+    grid.innerHTML = posts.map((p) => `
+      <article class="post">
+        <div class="post__cover ${p.coverClass}"><span class="post__cover-icon">${p.cover}</span></div>
+        <div class="post__body">
+          <div class="post__date">${p.tag} · ${p.date}</div>
+          <h3 class="post__title">${p.title}</h3>
+          <p class="post__excerpt">${p.excerpt}</p>
+          <a href="#" class="post__read" onclick="alert('Em breve: artigo completo. Cadastre-se pra receber por e-mail!')">Ler artigo →</a>
+        </div>
+      </article>
+    `).join('');
+  </script>
+</body>
+</html>

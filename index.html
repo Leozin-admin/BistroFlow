@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="BistroFlow — A última IA que seu restaurante vai contratar. Atende, cozinha e gerencia o seu negócio 24/7." />
+  <title>BistroFlow — Automação inteligente para restaurantes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400;1,9..144,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/reset.css" />
+  <link rel="stylesheet" href="assets/css/variables.css" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/animations.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <link rel="stylesheet" href="assets/css/sections.css" />
+  <link rel="stylesheet" href="assets/css/responsive.css" />
+</head>
+<body>
+
+  <!-- Cursor customizado (opcional, ativado via JS) -->
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- NAV -->
+  <header class="nav" id="nav">
+    <div class="nav__inner container">
+      <a href="#top" class="nav__brand" data-link>
+        <span class="brand__mark" aria-hidden="true">
+          <span class="brand__dot"></span>
+        </span>
+        <span class="brand__text">BistroFlow</span>
+      </a>
+
+      <nav class="nav__links" aria-label="Principal">
+        <a href="#features" data-link>Recursos</a>
+        <a href="#how" data-link>Como funciona</a>
+        <a href="#pricing" data-link>Preços</a>
+        <a href="#cases" data-link>Casos</a>
+        <a href="#faq" data-link>FAQ</a>
+      </nav>
+
+      <div class="nav__cta">
+        <a href="#cta" class="btn btn--ghost" data-link>Entrar</a>
+        <a href="#cta" class="btn btn--primary" data-link>
+          Contratar Bistro <span class="arrow">→</span>
+        </a>
+      </div>
+
+      <button class="nav__burger" id="navBurger" aria-label="Abrir menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero__bg" aria-hidden="true">
+        <div class="hero__glow hero__glow--a"></div>
+        <div class="hero__glow hero__glow--b"></div>
+        <div class="hero__grid"></div>
+      </div>
+
+      <div class="container hero__inner">
+        <div class="hero__eyebrow reveal" data-reveal>
+          <span class="status-dot"></span>
+          <span>Sempre em serviço. Mesmo agora.</span>
+        </div>
+
+        <h1 class="hero__title reveal" data-reveal data-reveal-delay="80">
+          Eu sou <span class="serif italic">Bistro</span>,<br />
+          sua <span class="hl">última contratação</span>.
+        </h1>
+
+        <p class="hero__sub reveal" data-reveal data-reveal-delay="160">
+          Funciono como <span class="chip">bistro@seurestaurante.com</span> e sou parte do seu time.
+          Atendo clientes, organizo a cozinha e cuido da gestão — 24 horas, 7 dias por semana.
+        </p>
+
+        <div class="hero__cta reveal" data-reveal data-reveal-delay="240">
+          <a href="#cta" class="btn btn--primary btn--lg" data-link>
+            Contratar Bistro <span class="arrow">→</span>
+          </a>
+          <a href="#demo" class="btn btn--ghost btn--lg" data-link>
+            Ver demonstração
+          </a>
+        </div>
+
+        <!-- Console interativo -->
+        <div class="hero__console reveal" data-reveal data-reveal-delay="320" id="heroConsole">
+          <div class="console__bar">
+            <span class="console__dot" style="--c:#ff5f57"></span>
+            <span class="console__dot" style="--c:#febc2e"></span>
+            <span class="console__dot" style="--c:#28c840"></span>
+            <span class="console__title">bistro@cozinha — live</span>
+            <span class="console__pulse"><i></i> ao vivo</span>
+          </div>
+          <div class="console__body" id="consoleBody">
+            <!-- preenchido via JS -->
+          </div>
+        </div>
+      </div>
+
+      <div class="hero__scroll reveal" data-reveal data-reveal-delay="500" aria-hidden="true">
+        <span>role para descobrir</span>
+        <div class="scroll-line"></div>
+      </div>
+    </section>
+
+    <!-- LOGOS / SOCIAL PROOF -->
+    <section class="logos">
+      <div class="container">
+        <p class="logos__title reveal" data-reveal>Mais de 1.200 restaurantes já automatizaram com a gente</p>
+        <div class="logos__grid reveal" data-reveal data-reveal-delay="80" id="logosGrid">
+          <!-- injetado via JSON -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TRINDADE: ATENDENTE / COZINHEIRO / GESTOR -->
+    <section class="trinity" id="features">
+      <div class="container">
+        <div class="section__head reveal" data-reveal>
+          <span class="kicker">Três personas, um único sistema</span>
+          <h2 class="section__title">
+            <span class="serif italic">Bistro</span> trabalha em três frentes ao mesmo tempo.
+          </h2>
+          <p class="section__sub">
+            Enquanto você dorme, ele responde clientes, escala produção e fecha o caixa.
+          </p>
+        </div>
+
+        <div class="trinity__grid">
+          <article class="tcard reveal" data-reveal data-pillar="atendente">
+            <div class="tcard__num">01</div>
+            <div class="tcard__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <path d="M21 12a8 8 0 1 1-3.2-6.4L21 3v6h-6" />
+                <path d="M8 11h.01M12 11h.01M16 11h.01" />
+              </svg>
+            </div>
+            <h3 class="tcard__title">Atendente</h3>
+            <p class="tcard__lead">Responde no WhatsApp, Instagram e telefone com a voz da sua casa.</p>
+            <ul class="tcard__list">
+              <li><b>Sempre online.</b> 3 da manhã? Fim de semana? Ele responde.</li>
+              <li><b>Fala como você.</b> Treinado com seu cardápio, seu tom, suas regras.</li>
+              <li><b>Fecha o pedido.</b> Integra com iFood, Rappi e seu sistema de PDV.</li>
+            </ul>
+            <a href="#" class="link-arrow">Ver atendente <span>→</span></a>
+          </article>
+
+          <article class="tcard reveal" data-reveal data-reveal-delay="120" data-pillar="cozinheiro">
+            <div class="tcard__num">02</div>
+            <div class="tcard__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <path d="M6 2v6a4 4 0 0 0 4 4v10" />
+                <path d="M6 2c4 0 4 8 0 8" />
+                <path d="M18 2v6a4 4 0 0 1-4 4v10" />
+                <path d="M18 2c-4 0-4 8 0 8" />
+              </svg>
+            </div>
+            <h3 class="tcard__title">Cozinheiro</h3>
+            <p class="tcard__lead">Organiza a produção, escala a equipe e evita desperdício.</p>
+            <ul class="tcard__list">
+              <li><b>Previsão de demanda.</b> Sabe quantos pratos vão sair sexta à noite.</li>
+              <li><b>Lista de compras.</b> Gera o pedido de fornecedores automaticamente.</li>
+              <li><b>Controle de estoque.</b> Avisa antes de faltar, sugere antes de vencer.</li>
+            </ul>
+            <a href="#" class="link-arrow">Ver cozinheiro <span>→</span></a>
+          </article>
+
+          <article class="tcard reveal" data-reveal data-reveal-delay="240" data-pillar="gestor">
+            <div class="tcard__num">03</div>
+            <div class="tcard__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <path d="M3 3v18h18" />
+                <path d="M7 14l4-4 4 4 5-5" />
+              </svg>
+            </div>
+            <h3 class="tcard__title">Gestor</h3>
+            <p class="tcard__lead">Cuida do financeiro, marketing e relatórios do seu restaurante.</p>
+            <ul class="tcard__list">
+              <li><b>Fecha o caixa.</b> Concilia pagamentos, taxas e gorjetas todo dia.</li>
+              <li><b>Marketing que vende.</b> Dispara promo no horário certo pro cliente certo.</li>
+              <li><b>Relatórios claros.</b> Você lê em 2 minutos, no café da manhã.</li>
+            </ul>
+            <a href="#" class="link-arrow">Ver gestor <span>→</span></a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMO FUNCIONA -->
+    <section class="how" id="how">
+      <div class="container">
+        <div class="section__head reveal" data-reveal>
+          <span class="kicker">Em 15 minutos você está no ar</span>
+          <h2 class="section__title">
+            Configurar o <span class="serif italic">Bistro</span> é mais fácil que fritar um ovo.
+          </h2>
+        </div>
+
+        <ol class="how__steps">
+          <li class="how__step reveal" data-reveal>
+            <div class="how__num">01</div>
+            <h3>Conecta</h3>
+            <p>Integre WhatsApp, iFood, PDV e sistemas de delivery em poucos cliques.</p>
+            <div class="how__visual" aria-hidden="true">
+              <div class="chip-row">
+                <span class="mini-chip">WhatsApp</span>
+                <span class="mini-chip">iFood</span>
+                <span class="mini-chip">Rappi</span>
+                <span class="mini-chip">PDV</span>
+              </div>
+            </div>
+          </li>
+
+          <li class="how__step reveal" data-reveal data-reveal-delay="120">
+            <div class="how__num">02</div>
+            <h3>Aprende</h3>
+            <p>Ele lê seu cardápio, suas avaliações e o tom da sua marca em segundos.</p>
+            <div class="how__visual" aria-hidden="true">
+              <div class="learn-bars">
+                <span style="--h:40%"></span>
+                <span style="--h:70%"></span>
+                <span style="--h:55%"></span>
+                <span style="--h:90%"></span>
+                <span style="--h:65%"></span>
+              </div>
+            </div>
+          </li>
+
+          <li class="how__step reveal" data-reveal data-reveal-delay="240">
+            <div class="how__num">03</div>
+            <h3>Trabalha</h3>
+            <p>Você assiste ao primeiro pedido entrar e percebe: nunca mais vai voltar atrás.</p>
+            <div class="how__visual" aria-hidden="true">
+              <div class="ring-stack">
+                <div class="ring ring--1"></div>
+                <div class="ring ring--2"></div>
+                <div class="ring ring--3"></div>
+              </div>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- DEMO / PRODUTO -->
+    <section class="demo" id="demo">
+      <div class="container demo__grid">
+        <div class="demo__copy reveal" data-reveal>
+          <span class="kicker">O produto</span>
+          <h2 class="section__title">
+            Um painel único.<br />
+            <span class="serif italic">Zero</span> caos.
+          </h2>
+          <p class="section__sub">
+            Pedidos, estoque, equipe, marketing e financeiro — tudo num só lugar,
+            com a inteligência do <span class="serif italic">Bistro</span> por trás.
+          </p>
+
+          <ul class="demo__list" id="demoList">
+            <!-- injetado via JSON -->
+          </ul>
+
+          <a href="#cta" class="btn btn--primary btn--lg" data-link>
+            Começar agora <span class="arrow">→</span>
+          </a>
+        </div>
+
+        <div class="demo__panel reveal" data-reveal data-reveal-delay="160">
+          <div class="panel">
+            <div class="panel__head">
+              <div class="panel__title">Pedidos ao vivo</div>
+              <div class="panel__live"><i></i> agora</div>
+            </div>
+            <ul class="panel__orders" id="panelOrders">
+              <!-- injetado via JSON -->
+            </ul>
+            <div class="panel__metrics">
+              <div class="metric">
+                <span class="metric__label">Faturamento hoje</span>
+                <span class="metric__value" data-counter data-to="8420">R$ 0</span>
+              </div>
+              <div class="metric">
+                <span class="metric__label">Ticket médio</span>
+                <span class="metric__value" data-counter data-to="87" data-prefix="R$ ">R$ 0</span>
+              </div>
+              <div class="metric">
+                <span class="metric__label">Tempo de resposta</span>
+                <span class="metric__value"><span data-counter data-to="12">0</span>s</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CASES -->
+    <section class="cases" id="cases">
+      <div class="container">
+        <div class="section__head reveal" data-reveal>
+          <span class="kicker">Quem usa, recomenda</span>
+          <h2 class="section__title">
+            Pizzaria, japonês, hambúrgueria, vegetariano.<br />
+            <span class="serif italic">Bistro</span> serve a todos.
+          </h2>
+        </div>
+
+        <div class="cases__grid" id="casesGrid">
+          <!-- injetado via JSON -->
+        </div>
+      </div>
+    </section>
+
+    <!-- DEPOIMENTO EDITORIAL -->
+    <section class="quote">
+      <div class="container">
+        <blockquote class="bigquote reveal" data-reveal>
+          <p>
+            “Antes do <span class="serif italic">Bistro</span>, eu atendia 30 pedidos por noite
+            e dormia às 3h. Hoje atendo 200 e durmo às 23h.
+            Ele pagou o investimento no primeiro mês.”
+          </p>
+          <footer>
+            <cite>Marina Tavares</cite>
+            <span>Don · Forno a Lenha Pizzaria</span>
+          </footer>
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- PREÇOS -->
+    <section class="pricing" id="pricing">
+      <div class="container">
+        <div class="section__head reveal" data-reveal>
+          <span class="kicker">Preços justos, sem letra miúda</span>
+          <h2 class="section__title">
+            Escolha o <span class="serif italic">Bistro</span> que cabe no seu balcão.
+          </h2>
+        </div>
+
+        <div class="pricing__grid" id="pricingGrid">
+          <!-- injetado via JSON -->
+        </div>
+
+        <p class="pricing__note reveal" data-reveal>
+          Todos os planos incluem 14 dias grátis. Sem cartão. Cancela quando quiser.
+        </p>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq" id="faq">
+      <div class="container faq__grid">
+        <div class="reveal" data-reveal>
+          <span class="kicker">Perguntas frequentes</span>
+          <h2 class="section__title">
+            Tudo o que você quer saber antes de contratar o <span class="serif italic">Bistro</span>.
+          </h2>
+        </div>
+
+        <div class="faq__list reveal" data-reveal data-reveal-delay="120" id="faqList">
+          <!-- injetado via JSON -->
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA FINAL -->
+    <section class="cta" id="cta">
+      <div class="container">
+        <div class="cta__box reveal" data-reveal>
+          <h2 class="cta__title">
+            Sua cozinha, no <span class="serif italic">piloto automático</span>.
+          </h2>
+          <p class="cta__sub">
+            Comece grátis por 14 dias. Em 15 minutos o Bistro já está atendendo seu primeiro cliente.
+          </p>
+
+          <form class="cta__form" id="ctaForm" novalidate>
+            <label class="sr-only" for="email">Seu e-mail</label>
+            <input
+              id="email"
+              type="email"
+              required
+              placeholder="seu@email.com"
+              autocomplete="email"
+            />
+            <button type="submit" class="btn btn--primary btn--lg">
+              Contratar Bistro <span class="arrow">→</span>
+            </button>
+          </form>
+          <p class="cta__small" id="ctaMsg">Sem cartão. Cancela quando quiser.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer__grid">
+      <div>
+        <a href="#top" class="nav__brand" data-link>
+          <span class="brand__mark" aria-hidden="true">
+            <span class="brand__dot"></span>
+          </span>
+          <span class="brand__text">BistroFlow</span>
+        </a>
+        <p class="footer__tag">A última IA que seu restaurante vai contratar.</p>
+      </div>
+
+      <div>
+        <h4>Produto</h4>
+        <ul>
+          <li><a href="#features" data-link>Recursos</a></li>
+          <li><a href="#pricing" data-link>Preços</a></li>
+          <li><a href="#cases" data-link>Casos</a></li>
+          <li><a href="#demo" data-link>Demonstração</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Empresa</h4>
+        <ul>
+          <li><a href="#">Sobre</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Carreiras</a></li>
+          <li><a href="#">Imprensa</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Termos</a></li>
+          <li><a href="#">Privacidade</a></li>
+          <li><a href="#">Cookies</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Social</h4>
+        <ul>
+          <li><a href="#">Instagram</a></li>
+          <li><a href="#">LinkedIn</a></li>
+          <li><a href="#">YouTube</a></li>
+          <li><a href="#">X (Twitter)</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="container footer__bottom">
+      <small>© <span id="year">2026</span> BistroFlow · Feito com ☕ e <span class="serif italic">carinho</span>.</small>
+    </div>
+  </footer>
+
+  <!-- Botão flutuante -->
+  <button class="fab" id="fab" aria-label="Voltar ao topo" title="Voltar ao topo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 19V5M5 12l7-7 7 7" />
+    </svg>
+  </button>
+
+  <!-- Scripts -->
+  <script src="assets/data/content.js"></script>
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/animations.js"></script>
+  <script src="assets/js/console.js"></script>
+  <script src="assets/js/counters.js"></script>
+  <script src="assets/js/navigation.js"></script>
+  <script src="assets/js/render.js"></script>
+  <script src="assets/js/interactions.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
