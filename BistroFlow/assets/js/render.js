@@ -95,7 +95,7 @@
           <span class="price__num" data-counter data-to="${p.price}">${p.price}</span>
           <span class="price__period">${esc(p.period)}</span>
         </div>
-        <a href="#cta" class="btn ${p.featured ? 'btn--primary' : 'btn--ghost'} btn--block" data-link>${esc(p.cta)}</a>
+        <a href="cadastro.html" class="btn ${p.featured ? 'btn--primary' : 'btn--ghost'} btn--block">${esc(p.cta)}</a>
         <ul class="price__list">
           ${p.features.map((f) => `<li><span class="check">✓</span> ${esc(f)}</li>`).join('')}
         </ul>
