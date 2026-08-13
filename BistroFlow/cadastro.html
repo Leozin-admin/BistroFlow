@@ -42,9 +42,23 @@
         <h2 class="auth__heading">Criar sua conta</h2>
         <p class="auth__sub2">Já tem conta? <a href="login.html">Entrar →</a></p>
 
+        <!-- Plan Selector -->
+        <div class="plan-selector" id="planSelector">
+          <div class="plan-selector__toggle">
+            <button type="button" class="plan-toggle__btn is-active" data-billing="monthly">Mensal</button>
+            <button type="button" class="plan-toggle__btn" data-billing="annual">
+              Anual <span class="plan-toggle__badge">−20%</span>
+            </button>
+          </div>
+          <div class="plan-selector__grid" id="planGrid">
+            <!-- injetado via JS -->
+          </div>
+        </div>
+
         <div class="auth__msg" id="authMsg"></div>
 
         <form class="auth__form" id="signupForm" novalidate>
+          <input type="hidden" id="selectedPlan" value="salao" />
           <div class="field">
             <label for="name">Seu nome</label>
             <input type="text" id="name" required autocomplete="name" placeholder="Como você se chama?" />
@@ -76,12 +90,13 @@
           </button>
         </form>
 
-        <p class="auth__foot">Ao criar, você ganha 14 dias de Salão grátis. <a href="index.html#pricing">Ver planos</a></p>
+        <p class="auth__foot">Ao criar, você ganha 14 dias grátis do plano escolhido. <a href="index.html#pricing">Ver planos</a></p>
       </div>
     </section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/data/content.js"></script>
   <script src="assets/js/utils.js"></script>
   <script src="assets/js/supabaseClient.js"></script>
   <script src="assets/js/auth.js"></script>
@@ -90,6 +105,12 @@
       const form = $('#signupForm');
       const msg  = $('#authMsg');
       const btn  = form.querySelector('button[type="submit"]');
+      const planInput = $('#selectedPlan');
+      const planGrid = $('#planGrid');
+      const plans = window.SITE_DATA?.pricing || [];
+      let billing = 'monthly';
+
+      /* --- helpers --- */
       const show = (text, type) => {
         msg.textContent = text;
         msg.className = `auth__msg is-show auth__msg--${type}`;
@@ -100,11 +121,59 @@
         btn.style.pointerEvents = on ? 'none' : '';
       };
 
-      // já logado? manda pro dashboard
+      /* --- read plan from URL --- */
+      const urlPlan = new URLSearchParams(window.location.search).get('plan');
+      if (urlPlan && plans.find(p => p.id === urlPlan)) {
+        planInput.value = urlPlan;
+      }
+
+      /* --- render plan cards --- */
+      function renderPlans() {
+        const selected = planInput.value;
+        planGrid.innerHTML = plans.map(p => {
+          const price = billing === 'annual' ? p.priceAnnual : p.price;
+          const isSelected = p.id === selected;
+          return `
+            <button type="button" class="plan-card ${isSelected ? 'plan-card--active' : ''} ${p.featured ? 'plan-card--popular' : ''}" data-plan="${p.id}">
+              ${p.featured ? '<span class="plan-card__flag">Popular</span>' : ''}
+              <div class="plan-card__name">${p.name}</div>
+              <div class="plan-card__price">
+                <span class="plan-card__currency">R$</span>
+                <span class="plan-card__num">${price}</span>
+                <span class="plan-card__period">/mês</span>
+              </div>
+              <div class="plan-card__tag">${p.tagline}</div>
+              ${isSelected ? '<div class="plan-card__check">✓ Selecionado</div>' : ''}
+            </button>
+          `;
+        }).join('');
+
+        /* bind clicks */
+        planGrid.querySelectorAll('.plan-card').forEach(card => {
+          card.addEventListener('click', () => {
+            planInput.value = card.dataset.plan;
+            renderPlans();
+          });
+        });
+      }
+
+      renderPlans();
+
+      /* --- billing toggle --- */
+      $$('.plan-toggle__btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          billing = btn.dataset.billing;
+          $$('.plan-toggle__btn').forEach(b => b.classList.toggle('is-active', b === btn));
+          renderPlans();
+        });
+      });
+
+      /* --- auth guard (already logged in) --- */
       Auth.getSession().then((s) => {
         if (s) window.location.href = 'dashboard.html';
       });
 
+      /* --- form submit --- */
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const data = {
@@ -135,6 +204,18 @@
           }
           return;
         }
+
+        /* save selected plan to localStorage for dashboard to pick up */
+        const selectedPlan = plans.find(p => p.id === planInput.value) || plans[1];
+        localStorage.setItem('bf_selected_plan', JSON.stringify({
+          id: selectedPlan.id,
+          name: selectedPlan.name,
+          price: billing === 'annual' ? selectedPlan.priceAnnual : selectedPlan.price,
+          billing: billing,
+          status: 'trial',
+          trialEnd: new Date(Date.now() + 14 * 86400000).toISOString()
+        }));
+
         show('Conta criada! Entrando...', 'ok');
         setTimeout(() => window.location.href = 'dashboard.html', 700);
       });
@@ -142,3 +223,4 @@
   </script>
 </body>
 </html>
+
