@@ -8,8 +8,8 @@
   const userMeta = session.user.user_metadata || {};
 
   // ===== user info =====
-  $('#userName').textContent  = userMeta.name || session.user.email;
-  $('#userRest').textContent  = userMeta.restaurant || '—';
+  $('#userName').textContent = userMeta.name || session.user.email;
+  $('#userRest').textContent = userMeta.restaurant || '—';
   $('#userAvatar').textContent = (userMeta.name || session.user.email).charAt(0).toUpperCase();
   $('#helloName').textContent = (userMeta.name || session.user.email).split(' ')[0];
 
@@ -45,8 +45,8 @@
   // ===== modal =====
   const modal = $('#modal');
   const modalTitle = $('#modalTitle');
-  const modalBody  = $('#modalBody');
-  const modalFoot  = $('#modalFoot');
+  const modalBody = $('#modalBody');
+  const modalFoot = $('#modalFoot');
   const openModal = (title, bodyHTML, footHTML) => {
     modalTitle.textContent = title;
     modalBody.innerHTML = bodyHTML;
@@ -84,19 +84,31 @@
     const today = new Date().toDateString();
     const todayOrders = orders.filter((o) => new Date(o.created_at).toDateString() === today);
     const revenue = todayOrders.reduce((s, o) => s + Number(o.total), 0);
-    const ticket  = todayOrders.length ? revenue / todayOrders.length : 0;
+    const ticket = todayOrders.length ? revenue / todayOrders.length : 0;
 
     $('#mRevenue').textContent = BRL(revenue);
-    $('#mOrders').textContent  = todayOrders.length;
-    $('#mTicket').textContent  = BRL(ticket);
+    $('#mOrders').textContent = todayOrders.length;
+    $('#mTicket').textContent = BRL(ticket);
 
-    // chart: vendas últimos 7 dias (simulado)
-    const data = [320, 540, 410, 680, 590, 720, revenue || 480];
-    const max = Math.max(...data);
-    $('#chartBars').innerHTML = data.map((v, i) => {
-      const labels = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Hoje'];
-      return `<div class="chart__bar" style="height:${(v / max) * 100}%" data-label="${labels[i]}" title="${BRL(v)}"></div>`;
-    }).join('');
+    // chart: vendas dos últimos 7 dias (dado real)
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      days.push(d);
+    }
+    const labels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const chartData = days.map((d) => {
+      const key = d.toDateString();
+      const total = orders
+        .filter((o) => new Date(o.created_at).toDateString() === key)
+        .reduce((s, o) => s + Number(o.total), 0);
+      return { label: key === today ? 'Hoje' : labels[d.getDay()], value: total };
+    });
+    const max = Math.max(...chartData.map((d) => d.value), 1);
+    $('#chartBars').innerHTML = chartData.map((d) =>
+      `<div class="chart__bar" style="height:${(d.value / max) * 100}%" data-label="${d.label}" title="${BRL(d.value)}"></div>`
+    ).join('');
 
     // pedidos recentes
     const recent = orders.slice(0, 5);
@@ -130,12 +142,12 @@
           <td><strong>${BRL(Number(o.total))}</strong></td>
           <td>
             <select onchange="window.__bfSetStatus('${o.id}', this.value)" style="padding:6px 10px;border-radius:6px;border:1px solid var(--line);background:var(--bg-elev);font-size:12px">
-              <option value="novo"       ${o.status==='novo'?'selected':''}>Novo</option>
-              <option value="confirmado" ${o.status==='confirmado'?'selected':''}>Confirmado</option>
-              <option value="preparando" ${o.status==='preparando'?'selected':''}>Preparando</option>
-              <option value="pronto"     ${o.status==='pronto'?'selected':''}>Pronto</option>
-              <option value="entregue"   ${o.status==='entregue'?'selected':''}>Entregue</option>
-              <option value="cancelado"  ${o.status==='cancelado'?'selected':''}>Cancelado</option>
+              <option value="novo"       ${o.status === 'novo' ? 'selected' : ''}>Novo</option>
+              <option value="confirmado" ${o.status === 'confirmado' ? 'selected' : ''}>Confirmado</option>
+              <option value="preparando" ${o.status === 'preparando' ? 'selected' : ''}>Preparando</option>
+              <option value="pronto"     ${o.status === 'pronto' ? 'selected' : ''}>Pronto</option>
+              <option value="entregue"   ${o.status === 'entregue' ? 'selected' : ''}>Entregue</option>
+              <option value="cancelado"  ${o.status === 'cancelado' ? 'selected' : ''}>Cancelado</option>
             </select>
           </td>
           <td>${timeAgo(o.created_at)}</td>
@@ -199,11 +211,11 @@
     $('#np-save').addEventListener('click', async () => {
       const o = {
         customer: $('#np-customer').value.trim() || 'Cliente',
-        phone:    $('#np-phone').value.trim() || null,
-        items:    $('#np-items').value.trim() || '—',
-        total:    parseFloat($('#np-total').value) || 0,
-        channel:  $('#np-channel').value,
-        status:   'novo'
+        phone: $('#np-phone').value.trim() || null,
+        items: $('#np-items').value.trim() || '—',
+        total: parseFloat($('#np-total').value) || 0,
+        channel: $('#np-channel').value,
+        status: 'novo'
       };
       await Store.addOrder(o);
       closeModal();
@@ -224,7 +236,7 @@
     } else {
       body.innerHTML = items.map((i) => {
         const price = Number(i.price);
-        const cost  = Number(i.cost);
+        const cost = Number(i.cost);
         const margin = price > 0 ? Math.round(((price - cost) / price) * 100) : 0;
         return `
           <tr>
@@ -293,13 +305,13 @@
     `);
     $('#mi-save').addEventListener('click', async () => {
       const data = {
-        name:        $('#mi-name').value.trim() || 'Item',
+        name: $('#mi-name').value.trim() || 'Item',
         description: $('#mi-desc').value.trim(),
-        category:    $('#mi-cat').value.trim() || 'Pratos',
-        stock:       parseInt($('#mi-stock').value, 10) || 0,
-        price:       parseFloat($('#mi-price').value) || 0,
-        cost:        parseFloat($('#mi-cost').value) || 0,
-        available:   $('#mi-avail').checked
+        category: $('#mi-cat').value.trim() || 'Pratos',
+        stock: parseInt($('#mi-stock').value, 10) || 0,
+        price: parseFloat($('#mi-price').value) || 0,
+        cost: parseFloat($('#mi-cost').value) || 0,
+        available: $('#mi-avail').checked
       };
       if (isEdit) await Store.updateMenuItem(item.id, data);
       else await Store.addMenuItem(data);
@@ -400,17 +412,17 @@
   // ============================================================
   async function renderSettings() {
     const s = await Store.getSettings();
-    $('#setName').value  = s.restaurantName || userMeta.restaurant || '';
+    $('#setName').value = s.restaurantName || userMeta.restaurant || '';
     $('#setWhats').value = s.whatsapp || '';
     $('#setNotif').checked = s.notifications !== false;
-    $('#setAuto').checked  = s.autoConfirm !== false;
+    $('#setAuto').checked = s.autoConfirm !== false;
   }
   $('#btnSaveSettings').addEventListener('click', async () => {
     await Store.setSettings({
       restaurantName: $('#setName').value.trim(),
-      whatsapp:       $('#setWhats').value.trim(),
-      notifications:  $('#setNotif').checked,
-      autoConfirm:    $('#setAuto').checked
+      whatsapp: $('#setWhats').value.trim(),
+      notifications: $('#setNotif').checked,
+      autoConfirm: $('#setAuto').checked
     });
     alert('Configurações salvas! ✓');
   });
@@ -430,12 +442,12 @@
   async function render(view) {
     try {
       switch (view) {
-        case 'overview':   await renderOverview();  break;
-        case 'orders':     await renderOrders();    break;
-        case 'menu':       await renderMenu();      break;
-        case 'inventory':  await renderInventory(); break;
-        case 'customers':  await renderCustomers(); break;
-        case 'settings':   await renderSettings();  break;
+        case 'overview': await renderOverview(); break;
+        case 'orders': await renderOrders(); break;
+        case 'menu': await renderMenu(); break;
+        case 'inventory': await renderInventory(); break;
+        case 'customers': await renderCustomers(); break;
+        case 'settings': await renderSettings(); break;
       }
     } catch (err) {
       console.error('[render]', err);
