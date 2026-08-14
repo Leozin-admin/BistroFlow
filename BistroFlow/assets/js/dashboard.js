@@ -179,16 +179,16 @@
   function newOrderModal() {
     openModal('Novo pedido', `
       <div class="field">
-        <label>Nome do cliente</label>
+        <label for="np-customer">Nome do cliente</label>
         <input type="text" id="np-customer" />
       </div>
       <div class="field-row">
         <div class="field">
-          <label>Telefone</label>
+          <label for="np-phone">Telefone</label>
           <input type="tel" id="np-phone" />
         </div>
         <div class="field">
-          <label>Canal</label>
+          <label for="np-channel">Canal</label>
           <select id="np-channel" style="padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg-elev)">
             <option value="balcao">Balcão</option>
             <option value="whatsapp">WhatsApp</option>
@@ -197,11 +197,11 @@
         </div>
       </div>
       <div class="field">
-        <label>Itens (separe por vírgula)</label>
+        <label for="np-items">Itens (separe por vírgula)</label>
         <input type="text" id="np-items" placeholder="2x Pizza Margherita, 1x Coca" />
       </div>
       <div class="field">
-        <label>Total (R$)</label>
+        <label for="np-total">Total (R$)</label>
         <input type="number" id="np-total" step="0.01" min="0" />
       </div>
     `, `
@@ -269,30 +269,30 @@
     const isEdit = !!item;
     openModal(isEdit ? 'Editar item' : 'Novo item do cardápio', `
       <div class="field">
-        <label>Nome</label>
+        <label for="mi-name">Nome</label>
         <input type="text" id="mi-name" value="${isEdit ? escapeHTML(item.name) : ''}" />
       </div>
       <div class="field">
-        <label>Descrição</label>
+        <label for="mi-desc">Descrição</label>
         <input type="text" id="mi-desc" value="${isEdit ? escapeHTML(item.description || '') : ''}" />
       </div>
       <div class="field-row">
         <div class="field">
-          <label>Categoria</label>
+          <label for="mi-cat">Categoria</label>
           <input type="text" id="mi-cat" value="${isEdit ? escapeHTML(item.category) : 'Pratos'}" />
         </div>
         <div class="field">
-          <label>Estoque</label>
+          <label for="mi-stock">Estoque</label>
           <input type="number" id="mi-stock" value="${isEdit ? item.stock : 100}" min="0" />
         </div>
       </div>
       <div class="field-row">
         <div class="field">
-          <label>Preço (R$)</label>
+          <label for="mi-price">Preço (R$)</label>
           <input type="number" id="mi-price" value="${isEdit ? item.price : 0}" step="0.01" min="0" />
         </div>
         <div class="field">
-          <label>Custo (R$)</label>
+          <label for="mi-cost">Custo (R$)</label>
           <input type="number" id="mi-cost" value="${isEdit ? item.cost : 0}" step="0.01" min="0" />
         </div>
       </div>

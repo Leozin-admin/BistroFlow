@@ -3,8 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
   <meta name="description" content="BistroFlow — A última IA que seu restaurante vai contratar. Atende, cozinha e gerencia o seu negócio 24/7." />
   <title>BistroFlow — Automação inteligente para restaurantes</title>
+  <link rel="canonical" href="https://leozin-admin.github.io/BistroFlow/" />
+  <link rel="manifest" href="manifest.webmanifest" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400;1,9..144,600&display=swap" rel="stylesheet" />
@@ -80,7 +85,7 @@
         </p>
 
         <div class="hero__cta reveal" data-reveal data-reveal-delay="240">
-          <a href="#cta" class="btn btn--primary btn--lg" data-link>
+          <a href="cadastro.html" class="btn btn--primary btn--lg">
             Contratar Bistro <span class="arrow">→</span>
           </a>
           <a href="#demo" class="btn btn--ghost btn--lg" data-link>
@@ -148,7 +153,7 @@
               <li><b>Fala como você.</b> Treinado com seu cardápio, seu tom, suas regras.</li>
               <li><b>Fecha o pedido.</b> Integra com iFood, Rappi e seu sistema de PDV.</li>
             </ul>
-            <a href="#" class="link-arrow">Ver atendente <span>→</span></a>
+            <a href="#demo" class="link-arrow" data-link>Ver atendente <span>→</span></a>
           </article>
 
           <article class="tcard reveal" data-reveal data-reveal-delay="120" data-pillar="cozinheiro">
@@ -168,7 +173,7 @@
               <li><b>Lista de compras.</b> Gera o pedido de fornecedores automaticamente.</li>
               <li><b>Controle de estoque.</b> Avisa antes de faltar, sugere antes de vencer.</li>
             </ul>
-            <a href="#" class="link-arrow">Ver cozinheiro <span>→</span></a>
+            <a href="#demo" class="link-arrow" data-link>Ver cozinheiro <span>→</span></a>
           </article>
 
           <article class="tcard reveal" data-reveal data-reveal-delay="240" data-pillar="gestor">
@@ -186,7 +191,7 @@
               <li><b>Marketing que vende.</b> Dispara promo no horário certo pro cliente certo.</li>
               <li><b>Relatórios claros.</b> Você lê em 2 minutos, no café da manhã.</li>
             </ul>
-            <a href="#" class="link-arrow">Ver gestor <span>→</span></a>
+            <a href="#demo" class="link-arrow" data-link>Ver gestor <span>→</span></a>
           </article>
         </div>
       </div>
@@ -266,7 +271,7 @@
             <!-- injetado via JSON -->
           </ul>
 
-          <a href="#cta" class="btn btn--primary btn--lg" data-link>
+          <a href="cadastro.html" class="btn btn--primary btn--lg">
             Começar agora <span class="arrow">→</span>
           </a>
         </div>
@@ -369,34 +374,6 @@
       </div>
     </section>
 
-    <!-- CTA FINAL -->
-    <section class="cta" id="cta">
-      <div class="container">
-        <div class="cta__box reveal" data-reveal>
-          <h2 class="cta__title">
-            Sua cozinha, no <span class="serif italic">piloto automático</span>.
-          </h2>
-          <p class="cta__sub">
-            Comece grátis por 14 dias. Em 15 minutos o Bistro já está atendendo seu primeiro cliente.
-          </p>
-
-          <form class="cta__form" id="ctaForm" novalidate>
-            <label class="sr-only" for="email">Seu e-mail</label>
-            <input
-              id="email"
-              type="email"
-              required
-              placeholder="seu@email.com"
-              autocomplete="email"
-            />
-            <button type="submit" class="btn btn--primary btn--lg">
-              Contratar Bistro <span class="arrow">→</span>
-            </button>
-          </form>
-          <p class="cta__small" id="ctaMsg">Sem cartão. Cancela quando quiser.</p>
-        </div>
-      </div>
-    </section>
   </main>
 
   <!-- FOOTER -->
@@ -425,29 +402,29 @@
       <div>
         <h4>Empresa</h4>
         <ul>
-          <li><a href="#">Sobre</a></li>
-          <li><a href="#">Blog</a></li>
-          <li><a href="#">Carreiras</a></li>
-          <li><a href="#">Imprensa</a></li>
+          <li><span>Sobre — em breve</span></li>
+          <li><a href="blog.html">Blog</a></li>
+          <li><span>Carreiras — em breve</span></li>
+          <li><span>Imprensa — em breve</span></li>
         </ul>
       </div>
 
       <div>
         <h4>Legal</h4>
         <ul>
-          <li><a href="#">Termos</a></li>
-          <li><a href="#">Privacidade</a></li>
-          <li><a href="#">Cookies</a></li>
+          <li><a href="termos.html">Termos</a></li>
+          <li><a href="politica-privacidade.html">Privacidade</a></li>
+          <li><a href="cookies.html">Cookies</a></li>
         </ul>
       </div>
 
       <div>
         <h4>Social</h4>
         <ul>
-          <li><a href="#">Instagram</a></li>
-          <li><a href="#">LinkedIn</a></li>
-          <li><a href="#">YouTube</a></li>
-          <li><a href="#">X (Twitter)</a></li>
+          <li><span>Instagram — em breve</span></li>
+          <li><span>LinkedIn — em breve</span></li>
+          <li><span>YouTube — em breve</span></li>
+          <li><span>X (Twitter) — em breve</span></li>
         </ul>
       </div>
     </div>
