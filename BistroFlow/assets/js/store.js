@@ -79,11 +79,11 @@ const Store = {
     const row = {
       user_id: uid,
       customer: o.customer || 'Cliente',
-      phone:    o.phone || null,
-      items:    o.items || '—',
-      total:    Number(o.total) || 0,
-      status:   o.status || 'novo',
-      channel:  o.channel || 'whatsapp'
+      phone: o.phone || null,
+      items: o.items || '—',
+      total: Number(o.total) || 0,
+      status: o.status || 'novo',
+      channel: o.channel || 'whatsapp'
     };
     const { data, error } = await this._client()
       .from('orders').insert(row).select().single();
@@ -104,7 +104,7 @@ const Store = {
     if (error) throw error;
   },
 
-  seedOrdersIfEmpty() {},
+  seedOrdersIfEmpty() { },
 
   /* ---------- customers ---------- */
 
@@ -119,7 +119,24 @@ const Store = {
     return data || [];
   },
 
-  seedCustomersIfEmpty() {},
+  async addCustomer(c) {
+    const uid = await this._requireUid();
+    const row = {
+      user_id: uid,
+      name: c.name || 'Cliente',
+      phone: c.phone || null,
+      email: c.email || null,
+      orders: 0,
+      total: 0,
+      last_order: null
+    };
+    const { data, error } = await this._client()
+      .from('customers').insert(row).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  seedCustomersIfEmpty() { },
 
   /* ---------- inventory ---------- */
 
@@ -141,7 +158,7 @@ const Store = {
     return data;
   },
 
-  seedInventoryIfEmpty() {},
+  seedInventoryIfEmpty() { },
 
   /* ---------- settings ---------- */
 
