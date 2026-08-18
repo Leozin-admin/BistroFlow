@@ -90,20 +90,32 @@
     $('#mOrders').textContent = todayOrders.length;
     $('#mTicket').textContent = BRL(ticket);
 
+<<<<<<< HEAD
     // chart: vendas últimos 7 dias (dado real)
     const dayLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+=======
+    // chart: vendas dos últimos 7 dias (dado real)
+>>>>>>> bfef04689d68421ae82d86712744274ed566b710
     const days = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       days.push(d);
     }
+<<<<<<< HEAD
+=======
+    const labels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+>>>>>>> bfef04689d68421ae82d86712744274ed566b710
     const chartData = days.map((d) => {
       const key = d.toDateString();
       const total = orders
         .filter((o) => new Date(o.created_at).toDateString() === key)
         .reduce((s, o) => s + Number(o.total), 0);
+<<<<<<< HEAD
       return { label: key === today ? 'Hoje' : dayLabels[d.getDay()], value: total };
+=======
+      return { label: key === today ? 'Hoje' : labels[d.getDay()], value: total };
+>>>>>>> bfef04689d68421ae82d86712744274ed566b710
     });
     const max = Math.max(...chartData.map((d) => d.value), 1);
     $('#chartBars').innerHTML = chartData.map((d) =>

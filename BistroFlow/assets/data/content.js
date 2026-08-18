@@ -58,9 +58,11 @@ window.SITE_DATA = {
 
   pricing: [
     {
+      id: 'balcao',
       name: 'Balcão',
       tagline: 'Pra quem está começando',
       price: 97,
+      priceAnnual: 77,
       period: '/mês',
       cta: 'Começar grátis',
       featured: false,
@@ -73,9 +75,11 @@ window.SITE_DATA = {
       ]
     },
     {
+      id: 'salao',
       name: 'Salão',
       tagline: 'O queridinho dos donos',
       price: 247,
+      priceAnnual: 197,
       period: '/mês',
       cta: 'Contratar Salão',
       featured: true,
@@ -90,9 +94,11 @@ window.SITE_DATA = {
       ]
     },
     {
+      id: 'rede',
       name: 'Rede',
       tagline: 'Pra quem tem várias casas',
       price: 697,
+      priceAnnual: 557,
       period: '/mês',
       cta: 'Falar com vendas',
       featured: false,

@@ -198,6 +198,32 @@ const Store = {
       .from('settings')
       .upsert(row, { onConflict: 'user_id' });
     if (error) throw error;
+  },
+
+  /* ---------- plan / billing ---------- */
+
+  /** Returns the current plan or a default trial plan */
+  getPlan() {
+    try {
+      const raw = localStorage.getItem('bf_selected_plan');
+      if (raw) return JSON.parse(raw);
+    } catch (e) { console.warn('[Store.getPlan]', e); }
+    // default: Salão trial
+    return {
+      id: 'salao',
+      name: 'Salão',
+      price: 247,
+      billing: 'monthly',
+      status: 'trial',
+      trialEnd: new Date(Date.now() + 14 * 86400000).toISOString()
+    };
+  },
+
+  /** Saves plan data to localStorage */
+  setPlan(planData) {
+    try {
+      localStorage.setItem('bf_selected_plan', JSON.stringify(planData));
+    } catch (e) { console.error('[Store.setPlan]', e); }
   }
 };
 

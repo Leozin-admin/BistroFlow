@@ -86,7 +86,7 @@
   const pricingGrid = $('#pricingGrid');
   if (pricingGrid && data.pricing) {
     pricingGrid.innerHTML = data.pricing.map((p, i) => `
-      <article class="price reveal ${p.featured ? 'price--featured' : ''}" data-reveal ${p.featured ? '' : `data-reveal-delay="${i * 100}"`}>
+      <article class="price reveal ${p.featured ? 'price--featured' : ''}" data-reveal ${p.featured ? '' : `data-reveal-delay="${i * 100}"`} data-plan-id="${esc(p.id)}">
         ${p.featured ? '<span class="price__flag">Mais escolhido</span>' : ''}
         <h3 class="price__name">${esc(p.name)}</h3>
         <p class="price__tag">${esc(p.tagline)}</p>
@@ -95,7 +95,11 @@
           <span class="price__num" data-counter data-to="${p.price}">${p.price}</span>
           <span class="price__period">${esc(p.period)}</span>
         </div>
+<<<<<<< HEAD
+        <a href="cadastro.html?plan=${esc(p.id)}" class="btn ${p.featured ? 'btn--primary' : 'btn--ghost'} btn--block">${esc(p.cta)}</a>
+=======
         <a href="cadastro.html" class="btn ${p.featured ? 'btn--primary' : 'btn--ghost'} btn--block">${esc(p.cta)}</a>
+>>>>>>> 78db2eabc7d26d4e7b895e62d68e5d78d09a0c48
         <ul class="price__list">
           ${p.features.map((f) => `<li><span class="check">✓</span> ${esc(f)}</li>`).join('')}
         </ul>
