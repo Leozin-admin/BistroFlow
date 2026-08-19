@@ -261,83 +261,58 @@
             <button class="btn btn--primary" id="btnNewCustomer">+ Novo cliente</button>
           </div>
         </div>
-  </div>
-  <div class="tbl">
-    <div class="tbl-head">
-      <div class="tbl-title">Base de clientes</div>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>Telefone</th>
-          <th>E-mail</th>
-          <th>Pedidos</th>
-          <th>Total gasto</th>
-          <th>Último pedido</th>
-        </tr>
-      </thead>
-      <tbody id="customersBody"></tbody>
-    </table>
-  </div>
-  </section>
-
-  <!-- CONFIGURAÇÕES -->
-  <section class="dash__view" data-view="settings">
-    <div class="dash__head">
-      <div>
-        <h1 class="dash__title">Configurações</h1>
-        <p class="dash__sub">Preferências do seu restaurante</p>
-      </div>
-    </div>
-    <div class="tbl" style="max-width: 640px">
-      <div class="tbl-head">
-        <div class="tbl-title">Geral</div>
-      </div>
-      <div style="padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-4);">
-        <div class="field">
-          <label for="setName">Nome do restaurante</label>
-          <input type="text" id="setName" />
+        <div class="tbl">
+          <div class="tbl-head">
+            <div class="tbl-title">Base de clientes</div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>E-mail</th>
+                <th>Pedidos</th>
+                <th>Total gasto</th>
+                <th>Último pedido</th>
+              </tr>
+            </thead>
+            <tbody id="customersBody"></tbody>
+          </table>
         </div>
-        <<<<<<< HEAD <div class="field">
-          <label for="setWhats">WhatsApp Business</label>
-          <input type="tel" id="setWhats" placeholder="(11) 99999-9999" />
-          =======
-          <div class="tbl" style="max-width: 640px">
-            <div class="tbl-head">
-              <div class="tbl-title">Geral</div>
-            </div>
-            <div style="padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-4);">
-              <div class="field">
-                <label for="setName">Nome do restaurante</label>
-                <input type="text" id="setName" />
-              </div>
-              <div class="field">
-                <label for="setWhats">WhatsApp Business</label>
-                <input type="tel" id="setWhats" placeholder="(11) 99999-9999" />
-              </div>
-              <label class="checkbox"><input type="checkbox" id="setNotif" /> Receber notificações de novos
-                pedidos</label>
-              <label class="checkbox"><input type="checkbox" id="setAuto" /> Confirmar pedidos automaticamente</label>
-              <div style="display:flex; gap:8px; margin-top: var(--sp-3);">
-                <button class="btn btn--primary" id="btnSaveSettings">Salvar alterações</button>
-                <button class="btn btn--ghost" id="btnResetData" style="color: var(--bad)">Resetar dados de
-                  demo</button>
-              </div>
-            </div>
-            >>>>>>> bfef04689d68421ae82d86712744274ed566b710
-          </div>
-          <label class="checkbox"><input type="checkbox" id="setNotif" /> Receber notificações de novos pedidos</label>
-          <label class="checkbox"><input type="checkbox" id="setAuto" /> Confirmar pedidos automaticamente</label>
-          <div style="display:flex; gap:8px; margin-top: var(--sp-3);">
-            <button class="btn btn--primary" id="btnSaveSettings">Salvar alterações</button>
-            <button class="btn btn--ghost" id="btnResetData" style="color: var(--bad)">Resetar dados de demo</button>
-          </div>
-      </div>
-    </div>
-  </section>
+      </section>
 
-  </main>
+      <!-- CONFIGURAÇÕES -->
+      <section class="dash__view" data-view="settings">
+        <div class="dash__head">
+          <div>
+            <h1 class="dash__title">Configurações</h1>
+            <p class="dash__sub">Preferências do seu restaurante</p>
+          </div>
+        </div>
+        <div class="tbl" style="max-width: 640px">
+          <div class="tbl-head">
+            <div class="tbl-title">Geral</div>
+          </div>
+          <div style="padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-4);">
+            <div class="field">
+              <label for="setName">Nome do restaurante</label>
+              <input type="text" id="setName" />
+            </div>
+            <div class="field">
+              <label for="setWhats">WhatsApp Business</label>
+              <input type="tel" id="setWhats" placeholder="(11) 99999-9999" />
+            </div>
+            <label class="checkbox"><input type="checkbox" id="setNotif" /> Receber notificações de novos
+              pedidos</label>
+            <label class="checkbox"><input type="checkbox" id="setAuto" /> Confirmar pedidos automaticamente</label>
+            <div style="display:flex; gap:8px; margin-top: var(--sp-3);">
+              <button class="btn btn--primary" id="btnSaveSettings">Salvar alterações</button>
+              <button class="btn btn--ghost" id="btnResetData" style="color: var(--bad)">Resetar dados de demo</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
 
   <!-- MODAL GENÉRICO -->
