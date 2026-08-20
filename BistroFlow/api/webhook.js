@@ -87,4 +87,4 @@ export default async function handler(req, res) {
         console.error('[webhook] erro ao processar evento:', err);
         return res.status(500).json({ error: err.message });
     }
-} s
+}
