@@ -91,20 +91,21 @@
     $('#mTicket').textContent = BRL(ticket);
 
     // chart: vendas dos últimos 7 dias (dado real)
+    const dayLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
     const days = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       days.push(d);
     }
-    const labels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
     const chartData = days.map((d) => {
       const key = d.toDateString();
       const total = orders
         .filter((o) => new Date(o.created_at).toDateString() === key)
         .reduce((s, o) => s + Number(o.total), 0);
-      return { label: key === today ? 'Hoje' : labels[d.getDay()], value: total };
+      return { label: key === today ? 'Hoje' : dayLabels[d.getDay()], value: total };
     });
+
     const max = Math.max(...chartData.map((d) => d.value), 1);
     $('#chartBars').innerHTML = chartData.map((d) =>
       `<div class="chart__bar" style="height:${(d.value / max) * 100}%" data-label="${d.label}" title="${BRL(d.value)}"></div>`
@@ -112,14 +113,16 @@
 
     // pedidos recentes
     const recent = orders.slice(0, 5);
-    $('#recentOrders').innerHTML = recent.length ? recent.map((o) => `
+    $('#recentOrders').innerHTML = recent.length
+      ? recent.map((o) => `
       <tr>
         <td><strong>${escapeHTML(o.customer)}</strong></td>
         <td>${escapeHTML(o.items)}</td>
         <td>${BRL(Number(o.total))}</td>
         <td><span class="status-pill status-pill--${o.status}">${o.status}</span></td>
       </tr>
-    `).join('') : '<tr><td colspan="4"><div class="empty"><div class="empty__icon">📭</div>Sem pedidos ainda</div></td></tr>';
+    `).join('')
+      : '<tr><td colspan="4"><div class="empty"><div class="empty__icon">📭</div>Sem pedidos ainda</div></td></tr>';
 
     await refreshBadge();
   }
@@ -407,6 +410,40 @@
     }
   }
 
+  function newCustomerModal() {
+    openModal('Novo cliente', `
+      <div class="field">
+        <label for="nc-name">Nome</label>
+        <input type="text" id="nc-name" />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="nc-phone">Telefone</label>
+          <input type="tel" id="nc-phone" />
+        </div>
+        <div class="field">
+          <label for="nc-email">E-mail</label>
+          <input type="email" id="nc-email" />
+        </div>
+      </div>
+    `, `
+      <button class="btn btn--ghost" onclick="document.getElementById('modal').classList.remove('is-open')">Cancelar</button>
+      <button class="btn btn--primary" id="nc-save">Adicionar</button>
+    `);
+    $('#nc-save').addEventListener('click', async () => {
+      const name = $('#nc-name').value.trim();
+      if (!name) { alert('Digite o nome do cliente.'); return; }
+      await Store.addCustomer({
+        name,
+        phone: $('#nc-phone').value.trim(),
+        email: $('#nc-email').value.trim()
+      });
+      closeModal();
+      await renderCustomers();
+    });
+  }
+  $('#btnNewCustomer').addEventListener('click', newCustomerModal);
+
   // ============================================================
   // RENDER: CONFIGURAÇÕES
   // ============================================================
@@ -458,8 +495,7 @@
   // ============================================================
   // EXPORTAR RELATÓRIO
   // ============================================================
-  $('#btnExport').addEventListener('click', async () => {
-    const orders = await Store.getOrders();
+  function exportCSV(orders) {
     const csv = [
       ['ID', 'Cliente', 'Telefone', 'Itens', 'Canal', 'Total', 'Status', 'Criado em'],
       ...orders.map((o) => [o.id, o.customer, o.phone || '', o.items, o.channel, Number(o.total).toFixed(2), o.status, o.created_at])
@@ -469,8 +505,60 @@
     a.href = URL.createObjectURL(blob);
     a.download = `bistroflow-relatorio-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
-  });
+  }
 
+  function exportPDF(orders) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const restName = userMeta.restaurant || 'Meu Restaurante';
+    const today = new Date();
+    const todayOrders = orders.filter((o) => new Date(o.created_at).toDateString() === today.toDateString());
+    const revenue = todayOrders.reduce((s, o) => s + Number(o.total), 0);
+    const ticket = todayOrders.length ? revenue / todayOrders.length : 0;
+
+    doc.setFontSize(18);
+    doc.text(restName, 14, 20);
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(`Relatório gerado em ${today.toLocaleDateString('pt-BR')} às ${today.toLocaleTimeString('pt-BR')}`, 14, 27);
+
+    doc.setFontSize(12);
+    doc.setTextColor(0);
+    doc.text(`Faturamento hoje: ${BRL(revenue)}`, 14, 38);
+    doc.text(`Pedidos hoje: ${todayOrders.length}`, 14, 45);
+    doc.text(`Ticket médio: ${BRL(ticket)}`, 14, 52);
+
+    doc.autoTable({
+      startY: 60,
+      head: [['Cliente', 'Itens', 'Canal', 'Total', 'Status', 'Data']],
+      body: orders.map((o) => [
+        o.customer,
+        o.items,
+        o.channel,
+        BRL(Number(o.total)),
+        o.status,
+        new Date(o.created_at).toLocaleDateString('pt-BR')
+      ]),
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [30, 30, 30] }
+    });
+
+    doc.save(`bistroflow-relatorio-${today.toISOString().slice(0, 10)}.pdf`);
+  }
+
+  $('#btnExport').addEventListener('click', async () => {
+    const orders = await Store.getOrders();
+    if (!orders.length) { alert('Nenhum pedido para exportar ainda.'); return; }
+    openModal('Exportar relatório', `
+      <p style="margin-bottom: var(--sp-4); color: var(--ink-soft)">Escolha o formato do relatório:</p>
+    `, `
+      <button class="btn btn--ghost" onclick="document.getElementById('modal').classList.remove('is-open')">Cancelar</button>
+      <button class="btn btn--ghost" id="exp-csv">Exportar CSV</button>
+      <button class="btn btn--primary" id="exp-pdf">Exportar PDF</button>
+    `);
+    $('#exp-csv').addEventListener('click', () => { exportCSV(orders); closeModal(); });
+    $('#exp-pdf').addEventListener('click', () => { exportPDF(orders); closeModal(); });
+  });
   // primeira renderização
   await render('overview');
 })();

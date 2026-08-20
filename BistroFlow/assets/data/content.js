@@ -22,11 +22,11 @@ window.SITE_DATA = {
   ],
 
   panelOrders: [
-    { name: 'Marina T.',    item: '2x Pizza Margherita + Refri', time: 'agora',     status: 'preparando',  value: 119.80 },
-    { name: 'Lucas M.',     item: '1x Combo Sushi 20 peças',     time: '2 min',    status: 'confirmado',  value: 89.90  },
-    { name: 'Camila R.',    item: '3x Hambúrguer Artesanal',     time: '5 min',    status: 'a caminho',  value: 142.50 },
-    { name: 'Pedro H.',     item: '1x Bowl Vegetariano',         time: '7 min',    status: 'entregue',    value: 47.00  },
-    { name: 'Joana S.',     item: '2x Sashimi Salmão 15pç',      time: '12 min',   status: 'preparando',  value: 156.00 }
+    { name: 'Marina T.', item: '2x Pizza Margherita + Refri', time: 'agora', status: 'preparando', value: 119.80 },
+    { name: 'Lucas M.', item: '1x Combo Sushi 20 peças', time: '2 min', status: 'confirmado', value: 89.90 },
+    { name: 'Camila R.', item: '3x Hambúrguer Artesanal', time: '5 min', status: 'a caminho', value: 142.50 },
+    { name: 'Pedro H.', item: '1x Bowl Vegetariano', time: '7 min', status: 'entregue', value: 47.00 },
+    { name: 'Joana S.', item: '2x Sashimi Salmão 15pç', time: '12 min', status: 'preparando', value: 156.00 }
   ],
 
   cases: [
@@ -61,8 +61,8 @@ window.SITE_DATA = {
       id: 'balcao',
       name: 'Balcão',
       tagline: 'Pra quem está começando',
-      price: 97,
-      priceAnnual: 77,
+      price: 0,
+      priceAnnual: 0,
       period: '/mês',
       cta: 'Começar grátis',
       featured: false,
@@ -78,8 +78,8 @@ window.SITE_DATA = {
       id: 'salao',
       name: 'Salão',
       tagline: 'O queridinho dos donos',
-      price: 247,
-      priceAnnual: 197,
+      price: 97.90,
+      priceAnnual: 1174.80,
       period: '/mês',
       cta: 'Contratar Salão',
       featured: true,
@@ -97,8 +97,8 @@ window.SITE_DATA = {
       id: 'rede',
       name: 'Rede',
       tagline: 'Pra quem tem várias casas',
-      price: 697,
-      priceAnnual: 557,
+      price: 159.90,
+      priceAnnual: 1918.80,
       period: '/mês',
       cta: 'Falar com vendas',
       featured: false,
