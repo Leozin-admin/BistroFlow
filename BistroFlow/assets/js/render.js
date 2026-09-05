@@ -95,11 +95,7 @@
           <span class="price__num" data-counter data-to="${p.price}">${p.price}</span>
           <span class="price__period">${esc(p.period)}</span>
         </div>
-<<<<<<< HEAD
         <a href="cadastro.html?plan=${esc(p.id)}" class="btn ${p.featured ? 'btn--primary' : 'btn--ghost'} btn--block">${esc(p.cta)}</a>
-=======
-        <a href="cadastro.html" class="btn ${p.featured ? 'btn--primary' : 'btn--ghost'} btn--block">${esc(p.cta)}</a>
->>>>>>> 78db2eabc7d26d4e7b895e62d68e5d78d09a0c48
         <ul class="price__list">
           ${p.features.map((f) => `<li><span class="check">✓</span> ${esc(f)}</li>`).join('')}
         </ul>
