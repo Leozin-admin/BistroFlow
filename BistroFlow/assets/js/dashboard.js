@@ -68,6 +68,19 @@
     return Math.round(diff / 1440) + 'd atrás';
   };
   const escapeHTML = utils.escapeHTML;
+  const isOpenOrder = (order) => !['entregue', 'cancelado'].includes(order.status);
+  const setTrend = (id, current, previous, suffix = '') => {
+    const el = $(id);
+    if (!previous) {
+      el.textContent = current ? 'Sem dados de ontem' : 'Sem movimento hoje';
+      el.className = 'metric-card__trend';
+      return;
+    }
+    const delta = ((current - previous) / previous) * 100;
+    const signal = delta >= 0 ? '↑' : '↓';
+    el.textContent = `${signal} ${Math.abs(delta).toFixed(0)}% vs ontem${suffix}`;
+    el.className = `metric-card__trend metric-card__trend--${delta >= 0 ? 'up' : 'down'}`;
+  };
 
   // ===== orders badge =====
   const refreshBadge = async () => {
@@ -80,15 +93,36 @@
   // RENDER: VISÃO GERAL
   // ============================================================
   async function renderOverview() {
-    const orders = await Store.getOrders();
+    const [orders, inventory] = await Promise.all([Store.getOrders(), Store.getInventory()]);
     const today = new Date().toDateString();
-    const todayOrders = orders.filter((o) => new Date(o.created_at).toDateString() === today);
+    const yesterdayDate = new Date();
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterday = yesterdayDate.toDateString();
+    const todayOrders = orders.filter((o) => new Date(o.created_at).toDateString() === today && o.status !== 'cancelado');
+    const yesterdayOrders = orders.filter((o) => new Date(o.created_at).toDateString() === yesterday && o.status !== 'cancelado');
     const revenue = todayOrders.reduce((s, o) => s + Number(o.total), 0);
     const ticket = todayOrders.length ? revenue / todayOrders.length : 0;
+    const yesterdayRevenue = yesterdayOrders.reduce((s, o) => s + Number(o.total), 0);
+    const yesterdayTicket = yesterdayOrders.length ? yesterdayRevenue / yesterdayOrders.length : 0;
+    const pending = orders.filter(isOpenOrder).length;
+    const lowInventory = inventory.filter((item) => Number(item.qty) < Number(item.min));
 
     $('#mRevenue').textContent = BRL(revenue);
     $('#mOrders').textContent = todayOrders.length;
     $('#mTicket').textContent = BRL(ticket);
+    $('#mPending').textContent = pending;
+    $('#mPendingTrend').textContent = pending ? 'Pedidos aguardando ação' : 'Tudo em dia';
+    $('#mPendingTrend').className = `metric-card__trend metric-card__trend--${pending ? 'down' : 'up'}`;
+    setTrend('#mRevenueTrend', revenue, yesterdayRevenue);
+    setTrend('#mOrdersTrend', todayOrders.length, yesterdayOrders.length);
+    setTrend('#mTicketTrend', ticket, yesterdayTicket);
+
+    const insights = [
+      { icon: pending ? '🧾' : '✓', title: pending ? `${pending} pedido${pending > 1 ? 's' : ''} em andamento` : 'Pedidos em dia', text: pending ? 'Acompanhe preparo e entrega na aba Pedidos.' : 'Nenhum pedido aguardando ação.' },
+      { icon: lowInventory.length ? '⚠' : '◌', title: lowInventory.length ? `${lowInventory.length} item${lowInventory.length > 1 ? 's' : ''} com estoque baixo` : 'Estoque saudável', text: lowInventory.length ? lowInventory.slice(0, 2).map((item) => item.name).join(', ') : 'Nenhum insumo abaixo do mínimo.' },
+      { icon: '↗', title: `${todayOrders.length} venda${todayOrders.length !== 1 ? 's' : ''} hoje`, text: revenue ? `Ticket médio de ${BRL(ticket)}.` : 'Registre o primeiro pedido do dia.' }
+    ];
+    $('#dashInsights').innerHTML = insights.map((item) => `<article class="dash__insight"><span class="dash__insight-icon">${item.icon}</span><div><strong>${escapeHTML(item.title)}</strong><p>${escapeHTML(item.text)}</p></div></article>`).join('');
 
     // chart: vendas dos últimos 7 dias (dado real)
     const dayLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -132,11 +166,18 @@
   // ============================================================
   async function renderOrders() {
     const orders = await Store.getOrders();
+    const query = $('#orderSearch').value.trim().toLowerCase();
+    const status = $('#orderStatusFilter').value;
+    const visibleOrders = orders.filter((order) => {
+      const matchesText = !query || [order.customer, order.items, order.phone, order.channel]
+        .some((value) => String(value || '').toLowerCase().includes(query));
+      return matchesText && (!status || order.status === status);
+    });
     const body = $('#ordersBody');
-    if (!orders.length) {
-      body.innerHTML = '<tr><td colspan="8"><div class="empty"><div class="empty__icon">📭</div>Nenhum pedido ainda. Que sorte!</div></td></tr>';
+    if (!visibleOrders.length) {
+      body.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="empty__icon">📭</div>${orders.length ? 'Nenhum pedido encontrado com esses filtros.' : 'Nenhum pedido ainda. Que sorte!'}</div></td></tr>`;
     } else {
-      body.innerHTML = orders.map((o) => `
+      body.innerHTML = visibleOrders.map((o) => `
         <tr>
           <td><code>${o.id.slice(0, 8).toUpperCase()}</code></td>
           <td><strong>${escapeHTML(o.customer)}</strong><br><small style="color:var(--ink-mute)">${escapeHTML(o.phone || '')}</small></td>
@@ -166,6 +207,8 @@
     }
     await refreshBadge();
   }
+  $('#orderSearch').addEventListener('input', () => renderOrders());
+  $('#orderStatusFilter').addEventListener('change', () => renderOrders());
 
   window.__bfSetStatus = async (id, status) => {
     await Store.updateOrderStatus(id, status);
@@ -221,6 +264,7 @@
         status: 'novo'
       };
       await Store.addOrder(o);
+      await Store.recordCustomerOrder(o);
       closeModal();
       await renderOrders();
     });
@@ -366,6 +410,9 @@
                 <button onclick="window.__bfRestock('${i.id}')" title="Repor">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg>
                 </button>
+                <button class="del" onclick="window.__bfDelInventory('${i.id}')" title="Excluir insumo">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                </button>
               </div>
             </td>
           </tr>
@@ -387,6 +434,39 @@
       await renderInventory();
     }
   };
+  window.__bfDelInventory = async (id) => {
+    if (!confirm('Excluir este insumo?')) return;
+    await Store.deleteInventory(id);
+    await renderInventory();
+  };
+
+  function newInventoryModal() {
+    openModal('Novo insumo', `
+      <div class="field"><label for="ni-name">Nome do insumo</label><input id="ni-name" type="text" /></div>
+      <div class="field-row">
+        <div class="field"><label for="ni-unit">Unidade</label><input id="ni-unit" type="text" value="un" placeholder="kg, un, L" /></div>
+        <div class="field"><label for="ni-qty">Estoque atual</label><input id="ni-qty" type="number" min="0" step="0.01" value="0" /></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label for="ni-min">Estoque mínimo</label><input id="ni-min" type="number" min="0" step="0.01" value="0" /></div>
+        <div class="field"><label for="ni-cost">Custo unitário (R$)</label><input id="ni-cost" type="number" min="0" step="0.01" value="0" /></div>
+      </div>
+    `, `<button class="btn btn--ghost" onclick="document.getElementById('modal').classList.remove('is-open')">Cancelar</button><button class="btn btn--primary" id="ni-save">Adicionar insumo</button>`);
+    $('#ni-save').addEventListener('click', async () => {
+      const name = $('#ni-name').value.trim();
+      if (!name) { alert('Digite o nome do insumo.'); return; }
+      await Store.addInventory({
+        name,
+        unit: $('#ni-unit').value.trim() || 'un',
+        qty: parseFloat($('#ni-qty').value) || 0,
+        min: parseFloat($('#ni-min').value) || 0,
+        cost: parseFloat($('#ni-cost').value) || 0
+      });
+      closeModal();
+      await renderInventory();
+    });
+  }
+  $('#btnNewInventory').addEventListener('click', newInventoryModal);
 
   // ============================================================
   // RENDER: CLIENTES
@@ -405,6 +485,7 @@
           <td>${c.orders}</td>
           <td><strong>${BRL(Number(c.total))}</strong></td>
           <td>${escapeHTML(c.last_order || '')}</td>
+          <td><div class="actions"><button onclick="window.__bfEditCustomer('${c.id}')" title="Editar cliente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="del" onclick="window.__bfDelCustomer('${c.id}')" title="Excluir cliente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td>
         </tr>
       `).join('');
     }
@@ -444,6 +525,27 @@
   }
   $('#btnNewCustomer').addEventListener('click', newCustomerModal);
 
+  window.__bfEditCustomer = async (id) => {
+    const customer = (await Store.getCustomers()).find((item) => item.id === id);
+    if (!customer) return;
+    openModal('Editar cliente', `
+      <div class="field"><label for="ec-name">Nome</label><input id="ec-name" type="text" value="${escapeHTML(customer.name)}" /></div>
+      <div class="field-row"><div class="field"><label for="ec-phone">Telefone</label><input id="ec-phone" type="tel" value="${escapeHTML(customer.phone || '')}" /></div><div class="field"><label for="ec-email">E-mail</label><input id="ec-email" type="email" value="${escapeHTML(customer.email || '')}" /></div></div>
+    `, `<button class="btn btn--ghost" onclick="document.getElementById('modal').classList.remove('is-open')">Cancelar</button><button class="btn btn--primary" id="ec-save">Salvar</button>`);
+    $('#ec-save').addEventListener('click', async () => {
+      const name = $('#ec-name').value.trim();
+      if (!name) { alert('Digite o nome do cliente.'); return; }
+      await Store.updateCustomer(id, { name, phone: $('#ec-phone').value.trim() || null, email: $('#ec-email').value.trim() || null });
+      closeModal();
+      await renderCustomers();
+    });
+  };
+  window.__bfDelCustomer = async (id) => {
+    if (!confirm('Excluir este cliente? O histórico de pedidos não será apagado.')) return;
+    await Store.deleteCustomer(id);
+    await renderCustomers();
+  };
+
   // ============================================================
   // RENDER: CONFIGURAÇÕES
   // ============================================================
@@ -464,12 +566,17 @@
     alert('Configurações salvas! ✓');
   });
   $('#btnResetData').addEventListener('click', async () => {
-    if (!confirm('Isso vai apagar TODOS os seus dados (cardápio, pedidos, estoque). Continuar?')) return;
-    const items = await Store.getMenu();
-    for (const i of items) await Store.deleteMenuItem(i.id);
-    const orders = await Store.getOrders();
-    for (const o of orders) await Store.deleteOrder(o.id);
-    alert('Dados resetados! Faça um novo cadastro se quiser ver os dados de demo novamente.');
+    if (!confirm('Isso vai apagar TODOS os seus dados: cardápio, pedidos, estoque e clientes. Continuar?')) return;
+    const [items, orders, inventory, customers] = await Promise.all([
+      Store.getMenu(), Store.getOrders(), Store.getInventory(), Store.getCustomers()
+    ]);
+    await Promise.all([
+      ...items.map((item) => Store.deleteMenuItem(item.id)),
+      ...orders.map((order) => Store.deleteOrder(order.id)),
+      ...inventory.map((item) => Store.deleteInventory(item.id)),
+      ...customers.map((customer) => Store.deleteCustomer(customer.id))
+    ]);
+    alert('Dados resetados com sucesso.');
     await render('overview');
   });
 

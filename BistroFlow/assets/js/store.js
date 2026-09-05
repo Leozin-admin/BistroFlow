@@ -104,6 +104,38 @@ const Store = {
     if (error) throw error;
   },
 
+  async recordCustomerOrder(order) {
+    const uid = await this._requireUid();
+    const customers = await this.getCustomers();
+    const normalizedName = (order.customer || '').trim().toLowerCase();
+    const normalizedPhone = (order.phone || '').replace(/\D/g, '');
+    const customer = customers.find((item) =>
+      (normalizedPhone && (item.phone || '').replace(/\D/g, '') === normalizedPhone) ||
+      (!normalizedPhone && item.name.trim().toLowerCase() === normalizedName)
+    );
+    const lastOrder = new Date().toISOString().slice(0, 10);
+    if (customer) {
+      const { error } = await this._client().from('customers').update({
+        name: order.customer || customer.name,
+        phone: order.phone || customer.phone,
+        orders: Number(customer.orders || 0) + 1,
+        total: Number(customer.total || 0) + Number(order.total || 0),
+        last_order: lastOrder
+      }).eq('id', customer.id);
+      if (error) throw error;
+      return;
+    }
+    const { error } = await this._client().from('customers').insert({
+      user_id: uid,
+      name: order.customer || 'Cliente',
+      phone: order.phone || null,
+      orders: 1,
+      total: Number(order.total || 0),
+      last_order: lastOrder
+    });
+    if (error) throw error;
+  },
+
   seedOrdersIfEmpty() { },
 
   /* ---------- customers ---------- */
@@ -136,6 +168,17 @@ const Store = {
     return data;
   },
 
+  async updateCustomer(id, patch) {
+    const { data, error } = await this._client().from('customers').update(patch).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteCustomer(id) {
+    const { error } = await this._client().from('customers').delete().eq('id', id);
+    if (error) throw error;
+  },
+
   seedCustomersIfEmpty() { },
 
   /* ---------- inventory ---------- */
@@ -156,6 +199,18 @@ const Store = {
       .from('inventory').update(patch).eq('id', id).select().single();
     if (error) throw error;
     return data;
+  },
+
+  async addInventory(item) {
+    const uid = await this._requireUid();
+    const { data, error } = await this._client().from('inventory').insert({ ...item, user_id: uid }).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteInventory(id) {
+    const { error } = await this._client().from('inventory').delete().eq('id', id);
+    if (error) throw error;
   },
 
   seedInventoryIfEmpty() { },

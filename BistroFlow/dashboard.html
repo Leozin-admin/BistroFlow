@@ -112,24 +112,26 @@
           <div class="metric-card">
             <div class="metric-card__label">Faturamento hoje</div>
             <div class="metric-card__value" id="mRevenue">R$ 0</div>
-            <div class="metric-card__trend metric-card__trend--up">↑ 12% vs ontem</div>
+            <div class="metric-card__trend" id="mRevenueTrend">Sem comparação ainda</div>
           </div>
           <div class="metric-card">
             <div class="metric-card__label">Pedidos</div>
             <div class="metric-card__value" id="mOrders">0</div>
-            <div class="metric-card__trend metric-card__trend--up">↑ 4 vs ontem</div>
+            <div class="metric-card__trend" id="mOrdersTrend">Sem comparação ainda</div>
           </div>
           <div class="metric-card">
             <div class="metric-card__label">Ticket médio</div>
             <div class="metric-card__value" id="mTicket">R$ 0</div>
-            <div class="metric-card__trend metric-card__trend--up">↑ 8%</div>
+            <div class="metric-card__trend" id="mTicketTrend">Sem comparação ainda</div>
           </div>
           <div class="metric-card">
             <div class="metric-card__label">Tempo de resposta</div>
-            <div class="metric-card__value" id="mResponse">12s</div>
-            <div class="metric-card__trend metric-card__trend--down">↓ 3s</div>
+            <div class="metric-card__value" id="mPending">0</div>
+            <div class="metric-card__trend" id="mPendingTrend">Pedidos aguardando</div>
           </div>
         </div>
+
+        <div class="dash__insights" id="dashInsights"></div>
 
         <div class="dash-grid-2">
           <div class="chart">
@@ -171,6 +173,20 @@
         <div class="tbl">
           <div class="tbl-head">
             <div class="tbl-title">Todos os pedidos</div>
+            <div class="dash__filters">
+              <label class="sr-only" for="orderSearch">Buscar pedido</label>
+              <input id="orderSearch" type="search" placeholder="Buscar cliente ou pedido" />
+              <label class="sr-only" for="orderStatusFilter">Filtrar por status</label>
+              <select id="orderStatusFilter">
+                <option value="">Todos os status</option>
+                <option value="novo">Novo</option>
+                <option value="confirmado">Confirmado</option>
+                <option value="preparando">Preparando</option>
+                <option value="pronto">Pronto</option>
+                <option value="entregue">Entregue</option>
+                <option value="cancelado">Cancelado</option>
+              </select>
+            </div>
           </div>
           <table>
             <thead>
@@ -229,6 +245,9 @@
             <h1 class="dash__title">Estoque</h1>
             <p class="dash__sub">Ingredientes e insumos — alertas abaixo do mínimo</p>
           </div>
+          <div class="dash__head-actions">
+            <button class="btn btn--primary" id="btnNewInventory">+ Novo insumo</button>
+          </div>
         </div>
         <div class="tbl">
           <div class="tbl-head">
@@ -274,6 +293,7 @@
                 <th>Pedidos</th>
                 <th>Total gasto</th>
                 <th>Último pedido</th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="customersBody"></tbody>
