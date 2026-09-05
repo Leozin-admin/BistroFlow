@@ -30,6 +30,17 @@ const Store = {
 
   async addMenuItem(item) {
     const uid = await this._requireUid();
+
+    // Plano Gratuito: limite de 12 itens
+    const sub = await this.getSubscription();
+    if (sub.plan === 'balcao') {
+      const { count } = await this._client()
+        .from('menu_items')
+        .select('*', { count: 'exact', head: false })
+        .eq('user_id', uid);
+      if (count >= 12) throw new Error('Limite de 12 itens no plano gratuito atingido. Faça upgrade pra adicionar mais.');
+    }
+
     const { data, error } = await this._client()
       .from('menu_items')
       .insert({ ...item, user_id: uid })
@@ -76,6 +87,21 @@ const Store = {
 
   async addOrder(o) {
     const uid = await this._requireUid();
+
+    // Plano Gratuito: limite de 300 pedidos nos últimos 30 dias
+    const sub = await this.getSubscription();
+    if (sub.plan === 'balcao') {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const { count } = await this._client()
+        .from('orders')
+        .select('*', { count: 'exact', head: false })
+        .eq('user_id', uid)
+        .gte('created_at', thirtyDaysAgo.toISOString());
+      if (count >= 300) throw new Error('Limite de 300 pedidos mensais no plano gratuito atingido. Faça upgrade pra adicionar mais.');
+    }
+
     const row = {
       user_id: uid,
       customer: o.customer || 'Cliente',
@@ -257,29 +283,26 @@ const Store = {
 
   /* ---------- plan / billing ---------- */
 
-  /** Returns the current plan or a default trial plan */
-  getPlan() {
-    try {
-      const raw = localStorage.getItem('bf_selected_plan');
-      if (raw) return JSON.parse(raw);
-    } catch (e) { console.warn('[Store.getPlan]', e); }
-    // default: Salão trial
-    return {
-      id: 'salao',
-      name: 'Salão',
-      price: 247,
-      billing: 'monthly',
-      status: 'trial',
-      trialEnd: new Date(Date.now() + 14 * 86400000).toISOString()
-    };
+  /** Returns the current plan from Supabase or a default free plan */
+  async getSubscription() {
+    const uid = await this._requireUid();
+    const { data, error } = await this._client()
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', uid)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('[Store.getSubscription]', error);
+    }
+
+    if (!data) {
+      return { plan: 'balcao', status: 'active', current_period_end: null };
+    }
+
+    return data;
   },
 
-  /** Saves plan data to localStorage */
-  setPlan(planData) {
-    try {
-      localStorage.setItem('bf_selected_plan', JSON.stringify(planData));
-    } catch (e) { console.error('[Store.setPlan]', e); }
-  }
 };
 
 window.Store = Store;

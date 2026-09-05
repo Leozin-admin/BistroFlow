@@ -5,6 +5,16 @@
   const session = await Auth.getSession();
   if (!session) { window.location.href = 'login.html'; return; }
 
+  // Stripe return handling
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('checkout') === 'success') {
+    alert('Assinatura confirmada! 🎉 Bem-vindo ao seu novo plano.');
+    window.history.replaceState({}, '', window.location.pathname);
+    await render('settings');
+  } else if (params.get('checkout') === 'cancel') {
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
   const userMeta = session.user.user_metadata || {};
 
   // ===== user info =====
@@ -82,6 +92,22 @@
     el.className = `metric-card__trend metric-card__trend--${delta >= 0 ? 'up' : 'down'}`;
   };
 
+  // Plan configuration
+  const PLAN_DATA = {
+    balcao: { name: 'Balcão', price: 'Grátis', color: 'status-pill--cancelado' },
+    salao: { name: 'Salão', price: 'R$ 97,90/mês', color: 'status-pill--preparando' },
+    rede: { name: 'Rede', price: 'R$ 159,90/mês', color: 'status-pill--pronto' }
+  };
+
+  const STATUS_MAP = {
+    active: 'Ativo',
+    canceled: 'Cancelado',
+    past_due: 'Pagamento pendente',
+    trailing: 'Em teste'
+  };
+
+  const formatDate = (iso) => iso ? new Date(iso).toLocaleDateString('pt-BR') : '—';
+
   // ===== orders badge =====
   const refreshBadge = async () => {
     const orders = await Store.getOrders();
@@ -90,7 +116,109 @@
   };
 
   // ============================================================
-  // RENDER: VISÃO GERAL
+  // PLAN & BILLING
+  // ============================================================
+  async function renderPlanCard() {
+    const sub = await Store.getSubscription();
+    const plan = PLAN_DATA[sub.plan] || PLAN_DATA.balcao;
+    const status = STATUS_MAP[sub.status] || sub.status;
+    const renewDate = formatDate(sub.current_period_end);
+
+    $('#planCard').innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center">
+        <div>
+          <span class="status-pill ${plan.color}">${plan.name}</span>
+          <strong style="margin-left:10px; font-size:16px">${plan.price}</strong>
+        </div>
+        <span class="status-pill" style="background:var(--bg-elev); color:var(--ink)">${status}</span>
+      </div>
+      <div style="font-size:13px; color:var(--ink-mute)">
+        ${sub.plan !== 'balcao' ? `Renovação em: <strong>${renewDate}</strong>` : 'Plano gratuito limitado.'}
+      </div>
+      <div style="display:flex; gap:10px; margin-top:var(--sp-2)">
+        <button class="btn btn--primary" id="btnChangePlan">Mudar de plano</button>
+        ${sub.plan !== 'balcao' ? `<button class="btn btn--ghost" id="btnManageSub">Gerenciar assinatura</button>` : ''}
+      </div>
+    `;
+
+    $('#btnChangePlan')?.addEventListener('click', openPlanModal);
+    $('#btnManageSub')?.addEventListener('click', manageSubscription);
+  }
+
+  function openPlanModal() {
+    const session = Auth.getSession(); // Need the session for userId/email
+
+    const plansHTML = Object.entries(PLAN_DATA).map(([id, data]) => {
+      // We need to know the current plan to disable the button
+      // Since Store.getSubscription is async, we'll handle it inside the click handler of the buttons
+      return `
+        <div class="plan-option" style="border:1px solid var(--line); padding:var(--sp-4); border-radius:var(--r-md); display:flex; flex-direction:column; gap:var(--sp-3); text-align:center">
+          <strong style="font-size:18px">${data.name}</strong>
+          <div style="font-size:20px; font-weight:800">${data.price}</div>
+          <p style="font-size:12px; color:var(--ink-mute); flex:1">
+            ${id === 'balcao' ? 'Ideal para quem está começando.' : id === 'salao' ? 'Mais recursos para seu salão.' : 'Solução completa para rede de lojas.'}
+          </p>
+          <button class="btn btn--primary btn-sub" data-plan="${id}">Assinar</button>
+        </div>
+      `;
+    }).join('');
+
+    openModal('Escolha seu plano', `
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:var(--sp-4)">
+        ${plansHTML}
+      </div>
+    `, `
+      <button class="btn btn--ghost" onclick="document.getElementById('modal').classList.remove('is-open')">Fechar</button>
+    `);
+
+    // Handle subscription clicks
+    $$('.btn-sub').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const planId = btn.dataset.plan;
+        const { user } = await session;
+
+        try {
+          const res = await fetch('/api/create-checkout-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ plan: planId, userId: user.id, userEmail: user.email })
+          });
+          const { url } = await res.json();
+          if (url) window.location.href = url;
+          else alert('Erro ao gerar sessão de checkout.');
+        } catch (e) {
+          alert('Erro na conexão: ' + e.message);
+        }
+      });
+    });
+
+    // Disable current plan
+    Store.getSubscription().then(sub => {
+      const currentBtn = $(`.btn-sub[data-plan="${sub.plan}"]`);
+      if (currentBtn) {
+        currentBtn.disabled = true;
+        currentBtn.textContent = 'Plano atual';
+        currentBtn.classList.replace('btn--primary', 'btn--ghost');
+      }
+    });
+  }
+
+  async function manageSubscription() {
+    const { user } = await Auth.getSession();
+    try {
+      const res = await fetch('/api/create-portal-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      });
+      const { url } = await res.json();
+      if (url) window.location.href = url;
+      else alert('Erro ao gerar sessão do portal.');
+    } catch (e) {
+      alert('Erro na conexão: ' + e.message);
+    }
+  }
+
   // ============================================================
   async function renderOverview() {
     const [orders, inventory] = await Promise.all([Store.getOrders(), Store.getInventory()]);
@@ -263,10 +391,14 @@
         channel: $('#np-channel').value,
         status: 'novo'
       };
-      await Store.addOrder(o);
-      await Store.recordCustomerOrder(o);
-      closeModal();
-      await renderOrders();
+      try {
+        await Store.addOrder(o);
+        await Store.recordCustomerOrder(o);
+        closeModal();
+        await renderOrders();
+      } catch (e) {
+        alert(e.message);
+      }
     });
   }
   $('#btnNewOrder').addEventListener('click', newOrderModal);
@@ -360,10 +492,14 @@
         cost: parseFloat($('#mi-cost').value) || 0,
         available: $('#mi-avail').checked
       };
-      if (isEdit) await Store.updateMenuItem(item.id, data);
-      else await Store.addMenuItem(data);
-      closeModal();
-      await renderMenu();
+      try {
+        if (isEdit) await Store.updateMenuItem(item.id, data);
+        else await Store.addMenuItem(data);
+        closeModal();
+        await renderMenu();
+      } catch (e) {
+        alert(e.message);
+      }
     });
   }
 
@@ -555,6 +691,8 @@
     $('#setWhats').value = s.whatsapp || '';
     $('#setNotif').checked = s.notifications !== false;
     $('#setAuto').checked = s.autoConfirm !== false;
+
+    await renderPlanCard();
   }
   $('#btnSaveSettings').addEventListener('click', async () => {
     await Store.setSettings({
