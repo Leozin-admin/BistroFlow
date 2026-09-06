@@ -72,6 +72,23 @@ const Store = {
   /** Compat com versão antiga (chamada no boot do dashboard). */
   seedMenuIfEmpty() { /* noop — seed é feito via trigger no signup */ },
 
+  /* ---------- ficha técnica ---------- */
+  async getRecipe(menuItemId) {
+    const uid = await this._requireUid();
+    const { data, error } = await this._client().from('recipe_items')
+      .select('inventory_id, qty_used').eq('menu_item_id', menuItemId).eq('user_id', uid);
+    if (error) throw error;
+    return data || [];
+  },
+
+  async setRecipe(menuItemId, items) {
+    await this._requireUid();
+    const { error } = await this._client().rpc('set_recipe', {
+      p_menu_item_id: menuItemId, p_items: items
+    });
+    if (error) throw error;
+  },
+
   /* ---------- orders ---------- */
 
   async getOrders() {
@@ -102,24 +119,18 @@ const Store = {
       if (count >= 300) throw new Error('Limite de 300 pedidos mensais no plano gratuito atingido. Faça upgrade pra adicionar mais.');
     }
 
-    const row = {
-      user_id: uid,
-      customer: o.customer || 'Cliente',
-      phone: o.phone || null,
-      items: o.items || '—',
-      total: Number(o.total) || 0,
-      status: o.status || 'novo',
-      channel: o.channel || 'whatsapp'
-    };
-    const { data, error } = await this._client()
-      .from('orders').insert(row).select().single();
+    const { data, error } = await this._client().rpc('create_order', {
+      p_order: { customer: o.customer, phone: o.phone, channel: o.channel },
+      p_items: o.orderItems
+    });
     if (error) throw error;
     return data;
   },
 
   async updateOrderStatus(id, status) {
-    const { data, error } = await this._client()
-      .from('orders').update({ status }).eq('id', id).select().single();
+    const { data, error } = await this._client().rpc('set_order_status', {
+      p_order_id: id, p_status: status
+    });
     if (error) throw error;
     return data;
   },

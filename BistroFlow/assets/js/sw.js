@@ -1,5 +1,5 @@
 /* sw.js — service worker mínimo pra PWA offline-friendly */
-const CACHE = 'bistroflow-v1';
+const CACHE = 'bistroflow-v2-recipes';
 const ASSETS = [
   './',
   './index.html',

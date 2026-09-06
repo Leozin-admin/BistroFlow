@@ -86,7 +86,7 @@
 .dash__view.is-active { display: block; animation: fadeUp 400ms var(--ease-out) both; }
 
 /* Cards de métrica */
-.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-4); margin-bottom: var(--sp-6); }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--sp-4); margin-bottom: var(--sp-6); }
 .metric-card {
   background: var(--bg-elev);
   border: 1px solid var(--line);
@@ -96,7 +96,7 @@
 }
 .metric-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
 .metric-card__label { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-mute); margin-bottom: var(--sp-2); }
-.metric-card__value { font-size: var(--fs-2xl); font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.metric-card__value { font-size: clamp(1.5rem, 2.4vw, 2rem); font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .metric-card__trend { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; font-size: 12px; font-weight: 600; }
 .metric-card__trend--up   { color: var(--ok); }
 .metric-card__trend--down { color: var(--bad); }
@@ -172,6 +172,19 @@
 .modal__close { width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--ink-mute); }
 .modal__close:hover { background: var(--bg-soft); color: var(--ink); }
 .modal__body { display: flex; flex-direction: column; gap: var(--sp-4); }
+.modal .field { display: flex; flex-direction: column; gap: 6px; }
+.modal .field label { font-size: 13px; font-weight: 600; }
+.modal .field input, .modal .field select { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--bg-elev); }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+.ingredient-section { border-top: 1px solid var(--line); padding-top: var(--sp-4); }
+.form-hint { color: var(--ink-mute); font-size: 13px; margin: 8px 0; }
+.ingredient-list { display: flex; flex-direction: column; gap: 10px; max-height: 280px; overflow-y: auto; }
+.ingredient-row { display: grid; grid-template-columns: minmax(0, 1fr) 100px; gap: 12px; align-items: center; }
+.ingredient-row label { overflow-wrap: anywhere; font-size: 14px; }
+.ingredient-row small { color: var(--ink-mute); }
+.ingredient-row input { width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--bg-elev); }
+.order-total { font-size: 20px; font-weight: 700; }
+.stock-warning { background: var(--bg-soft); border: 1px solid var(--line); border-left: 4px solid #b45309; border-radius: var(--r-md); padding: var(--sp-4); margin-bottom: var(--sp-4); }
 .modal__foot { display: flex; gap: 8px; justify-content: end; margin-top: var(--sp-5); }
 
 .empty {

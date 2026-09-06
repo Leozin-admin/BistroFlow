@@ -86,7 +86,7 @@
       el.className = 'metric-card__trend';
       return;
     }
-    const delta = ((current - previous) / previous) * 100;
+    const delta = ((current - previous) / Math.abs(previous)) * 100;
     const signal = delta >= 0 ? '↑' : '↓';
     el.textContent = `${signal} ${Math.abs(delta).toFixed(0)}% vs ontem${suffix}`;
     el.className = `metric-card__trend metric-card__trend--${delta >= 0 ? 'up' : 'down'}`;
@@ -226,9 +226,11 @@
     const yesterdayDate = new Date();
     yesterdayDate.setDate(yesterdayDate.getDate() - 1);
     const yesterday = yesterdayDate.toDateString();
-    const todayOrders = orders.filter((o) => new Date(o.created_at).toDateString() === today && o.status !== 'cancelado');
-    const yesterdayOrders = orders.filter((o) => new Date(o.created_at).toDateString() === yesterday && o.status !== 'cancelado');
+    const todayOrders = orders.filter((o) => new Date(o.created_at).toDateString() === today && o.status === 'entregue');
+    const yesterdayOrders = orders.filter((o) => new Date(o.created_at).toDateString() === yesterday && o.status === 'entregue');
     const revenue = todayOrders.reduce((s, o) => s + Number(o.total), 0);
+    const profit = todayOrders.reduce((s, o) => s + Number(o.total) - Number(o.cost_total ?? 0), 0);
+    const yesterdayProfit = yesterdayOrders.reduce((s, o) => s + Number(o.total) - Number(o.cost_total ?? 0), 0);
     const ticket = todayOrders.length ? revenue / todayOrders.length : 0;
     const yesterdayRevenue = yesterdayOrders.reduce((s, o) => s + Number(o.total), 0);
     const yesterdayTicket = yesterdayOrders.length ? yesterdayRevenue / yesterdayOrders.length : 0;
@@ -236,12 +238,14 @@
     const lowInventory = inventory.filter((item) => Number(item.qty) < Number(item.min));
 
     $('#mRevenue').textContent = BRL(revenue);
+    $('#mProfit').textContent = BRL(profit);
     $('#mOrders').textContent = todayOrders.length;
     $('#mTicket').textContent = BRL(ticket);
     $('#mPending').textContent = pending;
     $('#mPendingTrend').textContent = pending ? 'Pedidos aguardando ação' : 'Tudo em dia';
     $('#mPendingTrend').className = `metric-card__trend metric-card__trend--${pending ? 'down' : 'up'}`;
     setTrend('#mRevenueTrend', revenue, yesterdayRevenue);
+    setTrend('#mProfitTrend', profit, yesterdayProfit);
     setTrend('#mOrdersTrend', todayOrders.length, yesterdayOrders.length);
     setTrend('#mTicketTrend', ticket, yesterdayTicket);
 
@@ -263,7 +267,7 @@
     const chartData = days.map((d) => {
       const key = d.toDateString();
       const total = orders
-        .filter((o) => new Date(o.created_at).toDateString() === key)
+        .filter((o) => new Date(o.created_at).toDateString() === key && o.status === 'entregue')
         .reduce((s, o) => s + Number(o.total), 0);
       return { label: key === today ? 'Hoje' : dayLabels[d.getDay()], value: total };
     });
@@ -313,7 +317,7 @@
           <td>${escapeHTML(o.channel)}</td>
           <td><strong>${BRL(Number(o.total))}</strong></td>
           <td>
-            <select onchange="window.__bfSetStatus('${o.id}', this.value)" style="padding:6px 10px;border-radius:6px;border:1px solid var(--line);background:var(--bg-elev);font-size:12px">
+            <select data-order-status="${o.id}" ${statusUpdates.has(o.id) ? 'disabled' : ''} onchange="window.__bfSetStatus('${o.id}', this.value)" style="padding:6px 10px;border-radius:6px;border:1px solid var(--line);background:var(--bg-elev);font-size:12px">
               <option value="novo"       ${o.status === 'novo' ? 'selected' : ''}>Novo</option>
               <option value="confirmado" ${o.status === 'confirmado' ? 'selected' : ''}>Confirmado</option>
               <option value="preparando" ${o.status === 'preparando' ? 'selected' : ''}>Preparando</option>
@@ -338,9 +342,29 @@
   $('#orderSearch').addEventListener('input', () => renderOrders());
   $('#orderStatusFilter').addEventListener('change', () => renderOrders());
 
+  const statusUpdates = new Set();
   window.__bfSetStatus = async (id, status) => {
-    await Store.updateOrderStatus(id, status);
-    await renderOrders();
+    if (statusUpdates.has(id)) return;
+    statusUpdates.add(id);
+    const select = $(`[data-order-status="${id}"]`);
+    if (select) select.disabled = true;
+    const notice = $('#stockWarning');
+    notice.hidden = true;
+    try {
+      const result = await Store.updateOrderStatus(id, status);
+      const negative = result.negative_inventory || [];
+      if (negative.length) {
+        notice.textContent = 'Pedido entregue e consumo registrado. Estoque negativo: ' +
+          negative.map((i) => `${i.name}: ${Number(i.qty).toLocaleString('pt-BR', { maximumFractionDigits: 3 })} ${i.unit}`).join('; ') +
+          '. Confira os saldos na aba Estoque.';
+        notice.hidden = false;
+      }
+    } catch (e) {
+      alert('Não foi possível atualizar o pedido. Confira o status antes de tentar novamente: ' + e.message);
+    } finally {
+      statusUpdates.delete(id);
+      await renderOrders();
+    }
   };
   window.__bfDelOrder = async (id) => {
     if (confirm('Excluir este pedido?')) {
@@ -350,7 +374,10 @@
   };
 
   // modal de novo pedido
-  function newOrderModal() {
+  async function newOrderModal() {
+    let menu;
+    try { menu = (await Store.getMenu()).filter((item) => item.available); }
+    catch (e) { alert('Não foi possível carregar o cardápio: ' + e.message); return; }
     openModal('Novo pedido', `
       <div class="field">
         <label for="np-customer">Nome do cliente</label>
@@ -370,35 +397,56 @@
           </select>
         </div>
       </div>
-      <div class="field">
-        <label for="np-items">Itens (separe por vírgula)</label>
-        <input type="text" id="np-items" placeholder="2x Pizza Margherita, 1x Coca" />
-      </div>
-      <div class="field">
-        <label for="np-total">Total (R$)</label>
-        <input type="number" id="np-total" step="0.01" min="0" />
-      </div>
+      <section aria-labelledby="order-items-title">
+        <h3 id="order-items-title">Itens do pedido</h3>
+        <p class="form-hint">Escolha a quantidade de cada item.</p>
+        <div class="ingredient-list">
+          ${menu.length ? menu.map((item, index) => `
+            <div class="ingredient-row">
+              <label for="order-qty-${index}">${escapeHTML(item.name)} <small>${BRL(item.price)}</small></label>
+              <input id="order-qty-${index}" class="order-qty" data-menu-id="${item.id}" type="number" min="0" max="2147483647" step="1" value="0" required />
+            </div>`).join('') : '<p class="form-hint">Nenhum item disponível. Cadastre ou disponibilize itens na aba Cardápio.</p>'}
+        </div>
+      </section>
+      <div class="order-total">Total: <output id="np-total" aria-live="polite">${BRL(0)}</output></div>
     `, `
       <button class="btn btn--ghost" onclick="document.getElementById('modal').classList.remove('is-open')">Cancelar</button>
-      <button class="btn btn--primary" id="np-save">Criar pedido</button>
+      <button class="btn btn--primary" id="np-save" disabled>Criar pedido</button>
     `);
-    $('#np-save').addEventListener('click', async () => {
+    const inputs = $$('.order-qty');
+    const updateTotal = () => {
+      const cents = inputs.reduce((sum, input, index) => sum +
+        Math.round(Number(menu[index].price) * 100) * (Number(input.value) || 0), 0);
+      $('#np-total').textContent = BRL(cents / 100);
+      $('#np-save').disabled = !inputs.some((input) => Number(input.value) > 0) ||
+        inputs.some((input) => !input.checkValidity());
+    };
+    inputs.forEach((input) => input.addEventListener('input', updateTotal));
+    $('#np-save').addEventListener('click', async (event) => {
+      const button = event.currentTarget;
+      if (button.disabled || inputs.some((input) => !input.reportValidity())) return;
+      const orderItems = inputs.filter((input) => Number(input.value) > 0)
+        .map((input) => ({ menu_item_id: input.dataset.menuId, quantity: Number(input.value) }));
+      if (!orderItems.length) return;
       const o = {
         customer: $('#np-customer').value.trim() || 'Cliente',
         phone: $('#np-phone').value.trim() || null,
-        items: $('#np-items').value.trim() || '—',
-        total: parseFloat($('#np-total').value) || 0,
+        orderItems,
         channel: $('#np-channel').value,
         status: 'novo'
       };
+      button.disabled = true;
+      inputs.forEach((input) => { input.disabled = true; });
       try {
-        await Store.addOrder(o);
-        await Store.recordCustomerOrder(o);
+        const saved = await Store.addOrder(o);
         closeModal();
+        // O pedido já existe. Uma falha no cadastro do cliente não deve induzir nova criação.
+        try { await Store.recordCustomerOrder(saved); }
+        catch (e) { alert('Pedido criado, mas o histórico do cliente não foi atualizado: ' + e.message); }
         await renderOrders();
       } catch (e) {
         alert(e.message);
-      }
+      } finally { inputs.forEach((input) => { input.disabled = false; }); button.disabled = false; }
     });
   }
   $('#btnNewOrder').addEventListener('click', newOrderModal);
@@ -444,8 +492,16 @@
     }
   }
 
-  function menuItemModal(item) {
+  async function menuItemModal(item) {
     const isEdit = !!item;
+    let inventory, recipe;
+    try {
+      [inventory, recipe] = await Promise.all([
+        Store.getInventory(), isEdit ? Store.getRecipe(item.id) : Promise.resolve([])
+      ]);
+    } catch (e) { alert('Não foi possível carregar a ficha técnica: ' + e.message); return; }
+    const recipeQty = new Map(recipe.map((r) => [r.inventory_id, r.qty_used]));
+    let savedItemId = item?.id;
     openModal(isEdit ? 'Editar item' : 'Novo item do cardápio', `
       <div class="field">
         <label for="mi-name">Nome</label>
@@ -478,11 +534,28 @@
       <label class="checkbox">
         <input type="checkbox" id="mi-avail" ${!isEdit || item.available ? 'checked' : ''} /> Disponível para venda
       </label>
+      <section class="ingredient-section" aria-labelledby="recipe-title">
+        <h3 id="recipe-title">Ficha técnica</h3>
+        <p class="form-hint">Quantidade de cada insumo para uma unidade deste item. Deixe em branco ou zero os que não são usados.</p>
+        <div class="ingredient-list">
+          ${inventory.length ? inventory.map((i, index) => `
+            <div class="ingredient-row">
+              <label for="recipe-${index}">${escapeHTML(i.name)} <small>(${escapeHTML(i.unit)})</small></label>
+              <input id="recipe-${index}" class="recipe-qty" data-inventory-id="${i.id}" type="number" min="0" max="9999999.999" step="0.001" placeholder="0" value="${recipeQty.get(i.id) ?? ''}" />
+            </div>`).join('') : '<p class="form-hint">Cadastre insumos na aba Estoque para montar a receita.</p>'}
+        </div>
+      </section>
     `, `
       <button class="btn btn--ghost" onclick="document.getElementById('modal').classList.remove('is-open')">Cancelar</button>
       <button class="btn btn--primary" id="mi-save">${isEdit ? 'Salvar' : 'Adicionar'}</button>
     `);
-    $('#mi-save').addEventListener('click', async () => {
+    $('#mi-save').addEventListener('click', async (event) => {
+      const button = event.currentTarget;
+      if (button.disabled) return;
+      const quantityInputs = $$('.recipe-qty');
+      if (quantityInputs.some((input) => !input.reportValidity())) return;
+      const recipeItems = quantityInputs.filter((input) => Number(input.value) > 0)
+        .map((input) => ({ inventory_id: input.dataset.inventoryId, qty_used: Number(input.value) }));
       const data = {
         name: $('#mi-name').value.trim() || 'Item',
         description: $('#mi-desc').value.trim(),
@@ -492,14 +565,16 @@
         cost: parseFloat($('#mi-cost').value) || 0,
         available: $('#mi-avail').checked
       };
+      button.disabled = true;
       try {
-        if (isEdit) await Store.updateMenuItem(item.id, data);
-        else await Store.addMenuItem(data);
+        if (savedItemId) await Store.updateMenuItem(savedItemId, data);
+        else savedItemId = (await Store.addMenuItem(data)).id;
+        await Store.setRecipe(savedItemId, recipeItems);
         closeModal();
         await renderMenu();
       } catch (e) {
-        alert(e.message);
-      }
+        alert('Não foi possível salvar tudo. Confira os dados e tente novamente: ' + e.message);
+      } finally { button.disabled = false; }
     });
   }
 
@@ -531,13 +606,13 @@
           <tr>
             <td><strong>${escapeHTML(i.name)}</strong></td>
             <td>
-              <input type="number" value="${i.qty}" min="0" onchange="window.__bfSetStock('${i.id}', this.value)" style="width:80px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg-elev)" />
+              <input type="number" value="${i.qty}" step="0.001" onchange="window.__bfSetStock('${i.id}', this.value)" style="width:100px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg-elev)" />
               <small style="color:var(--ink-mute)"> ${escapeHTML(i.unit)}</small>
             </td>
             <td>${i.min} ${escapeHTML(i.unit)}</td>
             <td>
               <span class="status-pill ${low ? 'status-pill--cancelado' : 'status-pill--pronto'}">
-                ${low ? 'Estoque baixo' : 'OK'}
+                ${Number(i.qty) < 0 ? 'Estoque negativo' : low ? 'Estoque baixo' : 'OK'}
               </span>
             </td>
             <td>${BRL(Number(i.cost))}</td>
@@ -581,7 +656,7 @@
       <div class="field"><label for="ni-name">Nome do insumo</label><input id="ni-name" type="text" /></div>
       <div class="field-row">
         <div class="field"><label for="ni-unit">Unidade</label><input id="ni-unit" type="text" value="un" placeholder="kg, un, L" /></div>
-        <div class="field"><label for="ni-qty">Estoque atual</label><input id="ni-qty" type="number" min="0" step="0.01" value="0" /></div>
+        <div class="field"><label for="ni-qty">Estoque atual</label><input id="ni-qty" type="number" step="0.001" value="0" /></div>
       </div>
       <div class="field-row">
         <div class="field"><label for="ni-min">Estoque mínimo</label><input id="ni-min" type="number" min="0" step="0.01" value="0" /></div>
@@ -757,7 +832,7 @@
     const doc = new jsPDF();
     const restName = userMeta.restaurant || 'Meu Restaurante';
     const today = new Date();
-    const todayOrders = orders.filter((o) => new Date(o.created_at).toDateString() === today.toDateString());
+    const todayOrders = orders.filter((o) => new Date(o.created_at).toDateString() === today.toDateString() && o.status === 'entregue');
     const revenue = todayOrders.reduce((s, o) => s + Number(o.total), 0);
     const ticket = todayOrders.length ? revenue / todayOrders.length : 0;
 

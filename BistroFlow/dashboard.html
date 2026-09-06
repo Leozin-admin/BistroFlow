@@ -115,7 +115,13 @@
             <div class="metric-card__trend" id="mRevenueTrend">Sem comparação ainda</div>
           </div>
           <div class="metric-card">
-            <div class="metric-card__label">Pedidos</div>
+            <div class="metric-card__label">Lucro hoje</div>
+            <div class="metric-card__value" id="mProfit">R$ 0</div>
+            <div class="metric-card__trend" id="mProfitTrend">Sem comparação ainda</div>
+            <p class="form-hint">Considera o custo das fichas técnicas cadastradas.</p>
+          </div>
+          <div class="metric-card">
+            <div class="metric-card__label">Pedidos entregues hoje</div>
             <div class="metric-card__value" id="mOrders">0</div>
             <div class="metric-card__trend" id="mOrdersTrend">Sem comparação ainda</div>
           </div>
@@ -161,6 +167,7 @@
 
       <!-- PEDIDOS -->
       <section class="dash__view" data-view="orders">
+        <div id="stockWarning" class="stock-warning" role="status" aria-live="polite" hidden></div>
         <div class="dash__head">
           <div>
             <h1 class="dash__title">Pedidos</h1>

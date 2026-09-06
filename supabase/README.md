@@ -1,5 +1,50 @@
 # BistroFlow — Banco de dados
 
+## Fluxo de receitas e entregas (setembro de 2026)
+
+Após o schema base e a migration de janeiro, aplicar nesta ordem:
+
+1. `migrations/202609050001_recipe_precision.sql` — `qty_used`, proprietário da receita e RLS.
+2. `migrations/202609050002_save_recipe.sql` — função `set_recipe`, que substitui a receita em uma transação.
+3. `migrations/202609050003_structured_orders.sql` — quantidades inteiras, proprietário das linhas e função `create_order`.
+4. `migrations/202609050004_delivery_stock.sql` — custo, marcador da baixa, precisão de estoque, entrega e avisos.
+
+Não reaplicar a migration de janeiro depois das novas: ela reinstala a restrição contra estoque negativo e as policies antigas.
+O frontend atualizado depende das quatro migrations. Aplique o banco antes de publicar os arquivos do painel.
+O schema base é para instalação nova; não o reaplique em produção.
+
+### Antes de migrar
+
+- Se as receitas antigas tiverem `recipe_items.unit` diferente de `inventory.unit`, a primeira migration para sem aplicar mudanças. Converta a quantidade e a unidade da receita antes de tentar novamente; não há conversão automática.
+- Pedidos antigos com quantidades fracionadas impedem a terceira migration; os dados devem ser revisados antes de trocar para inteiros.
+- As migrations preservam as linhas existentes. `order_items.total` é uma coluna calculada e é recriada ao converter a quantidade.
+- A coluna legada `recipe_items.unit` permanece por compatibilidade. As novas receitas usam sempre a unidade do insumo.
+
+### Comportamento da operação
+
+- `create_order` usa os preços atuais do cardápio, exige itens disponíveis do usuário e salva pedido, total, texto e linhas juntos.
+- A mudança para `entregue` executa a baixa no banco, mesmo se chamada diretamente pelo cliente. Insumos compartilhados são agrupados; custo é `inventory.cost × consumo`, arredondado somente no total final.
+- Saldo insuficiente **não bloqueia a entrega**: a quantidade é descontada integralmente, podendo ficar negativa. `set_order_status` retorna `negative_inventory` para o aviso do painel.
+- `stock_deducted_at` evita baixa duplicada, inclusive entre chamadas simultâneas e ao retornar de outro status para entregue. O custo já calculado permanece histórico.
+- Mudar um pedido entregue para outro status não estorna estoque nem recalcula custo. Os itens estruturados ficam protegidos após a baixa.
+- Itens sem receita não movimentam estoque. Se nenhum item tiver receita, `cost_total` fica `NULL`; em pedidos mistos, soma-se o custo dos itens com receita.
+- Pedidos já entregues na data da migração recebem apenas o marcador: não há baixa retroativa nem reconstrução de custos. Pedidos legados em texto podem ser entregues, sem baixa porque não têm linhas estruturadas.
+- Faturamento e gráfico usam apenas entregues, agrupados pela **data de criação do pedido**, no dia local do navegador. “Lucro hoje” soma `total - (cost_total ?? 0)`; receitas ausentes resultam em custo não contabilizado, conforme a regra solicitada.
+
+### Validação local
+
+Há testes em `tests/` para PostgreSQL 18. Use **somente um banco descartável**:
+
+1. Execute `tests/bootstrap.sql` para simular o mínimo de `auth` e o papel `authenticated`.
+2. Aplique `schema.sql`, a migration de janeiro e as quatro migrations de setembro.
+3. Execute `tests/recipes_orders.sql` com `psql -v ON_ERROR_STOP=1`. As fixtures são revertidas ao final.
+4. Execute `node supabase/tests/concurrency.cjs` na raiz do repositório. Este teste cria fixtures no banco local e requer uma instância nova por execução.
+5. Opcional: `node supabase/tests/ui-server.cjs` abre uma integração local em `http://127.0.0.1:4173/dashboard.html`. Usa os arquivos reais do frontend com um adaptador de teste; não se conecta ao Supabase remoto.
+
+Os scripts Node acessam somente `127.0.0.1`, porta `55439`, banco `postgres`. `BF_TEST_PORT` e `BF_TEST_PSQL` permitem ajustar porta e executável. Não rode `bootstrap.sql` no Supabase real.
+
+O material abaixo descreve a estrutura **anterior** às migrations de setembro e permanece como histórico.
+
 Este diretório contém o schema base e as migrations do Supabase.
 
 ## Estrutura geral
