@@ -761,15 +761,21 @@
   // RENDER: CONFIGURAÇÕES
   // ============================================================
   async function renderSettings() {
-    const s = await Store.getSettings();
+    const [s, profile] = await Promise.all([Store.getSettings(), Store.getProfile()]);
     $('#setName').value = s.restaurantName || userMeta.restaurant || '';
     $('#setWhats').value = s.whatsapp || '';
+    $('#setSlug').value = profile?.slug || '';
     $('#setNotif').checked = s.notifications !== false;
     $('#setAuto').checked = s.autoConfirm !== false;
 
     await renderPlanCard();
   }
   $('#btnSaveSettings').addEventListener('click', async () => {
+    const slug = $('#setSlug').value.trim();
+    if (slug) {
+      try { await Store.updateProfile({ slug }); }
+      catch (e) { alert('Erro ao salvar slug: ' + e.message); return; }
+    }
     await Store.setSettings({
       restaurantName: $('#setName').value.trim(),
       whatsapp: $('#setWhats').value.trim(),

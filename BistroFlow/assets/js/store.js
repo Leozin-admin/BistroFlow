@@ -277,6 +277,29 @@ const Store = {
     };
   },
 
+  async getProfile() {
+    const uid = await this._requireUid();
+    const { data, error } = await this._client()
+      .from('profiles')
+      .select('slug')
+      .eq('id', uid)
+      .single();
+    if (error) { console.error('[Store.getProfile]', error); return null; }
+    return data;
+  },
+
+  async updateProfile(patch) {
+    const uid = await this._requireUid();
+    const { data, error } = await this._client()
+      .from('profiles')
+      .update(patch)
+      .eq('id', uid)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
   async setSettings(s) {
     const uid = await this._requireUid();
     const row = {

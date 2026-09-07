@@ -8,6 +8,7 @@ create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   name text not null,
   restaurant text not null default 'Meu Restaurante',
+  slug text unique,
   phone text,
   created_at timestamptz not null default now()
 );
@@ -118,13 +119,27 @@ declare
   v_name text;
   v_restaurant text;
   v_phone text;
+  v_slug text;
+  v_base_slug text;
+  v_counter int := 1;
 begin
   v_name       := coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1));
   v_restaurant := coalesce(new.raw_user_meta_data->>'restaurant', 'Meu Restaurante');
   v_phone      := new.raw_user_meta_data->>'phone';
 
-  insert into public.profiles (id, name, restaurant, phone)
-  values (new.id, v_name, v_restaurant, v_phone)
+  -- Gerar slug automático
+  v_base_slug := lower(regexp_replace(v_restaurant, '[^a-zA-Z0-9]+', '-', 'g'));
+  v_base_slug := trim(both '-' from v_base_slug);
+  if v_base_slug = '' then v_base_slug := 'restaurante'; end if;
+
+  v_slug := v_base_slug;
+  while exists (select 1 from public.profiles where slug = v_slug) loop
+    v_slug := v_base_slug || '-' || v_counter;
+    v_counter := v_counter + 1;
+  end loop;
+
+  insert into public.profiles (id, name, restaurant, phone, slug)
+  values (new.id, v_name, v_restaurant, v_phone, v_slug)
   on conflict (id) do nothing;
 
   insert into public.settings (user_id) values (new.id) on conflict do nothing;
