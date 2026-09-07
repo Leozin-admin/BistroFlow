@@ -4,6 +4,18 @@ begin;
 insert into auth.users (id, email) values
  ('10000000-0000-0000-0000-000000000001', 'recipe-test@example.invalid'),
  ('10000000-0000-0000-0000-000000000002', 'other-test@example.invalid');
+do $$
+begin
+  assert not exists (select 1 from public.inventory where user_id in
+    ('10000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000002')),
+    'Novas contas devem iniciar com estoque vazio';
+  assert (select count(*) = 2 from public.profiles where id in
+    ('10000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000002')),
+    'Cadastro continua criando os perfis';
+  assert (select count(*) = 2 from public.settings where user_id in
+    ('10000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000002')),
+    'Cadastro continua criando as configurações';
+end $$;
 insert into public.inventory (id, user_id, name, unit, qty, cost) values
  ('20000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','Farinha teste','kg',0.1,10),
  ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000001','Queijo teste','kg',1,20),

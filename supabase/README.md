@@ -1,5 +1,16 @@
 # BistroFlow — Banco de dados
 
+## Estoque vazio no cadastro
+
+A migration `migrations/202609070001_empty_initial_inventory.sql` remove os
+insumos de exemplo criados por `handle_new_user`. Novas contas iniciam com estoque
+vazio; o login não repõe insumos apagados. Insumos existentes não são removidos.
+Perfil, configurações e cardápio inicial continuam sendo criados normalmente.
+O `schema.sql` também contém essa regra para instalações novas.
+
+Aplique essa migration depois das migrations abaixo, inclusive antes de executar
+`tests/recipes_orders.sql`, que verifica o cadastro com estoque vazio.
+
 ## Fluxo de receitas e entregas (setembro de 2026)
 
 Aplicação no projeto Supabase `ritkjcnhvtdpbofiudex` concluída em **07/09/2026**.

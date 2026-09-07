@@ -72,7 +72,9 @@ async function main() {
   await sql(`insert into auth.users(id,email) values ('${uid}','ui-test@example.invalid') on conflict do nothing;`, false);
   const baseline = await sql(`select count(*) from orders;`);
   if (baseline === '0') {
-    await sql(`update inventory set qty=0.1 where name='Farinha de trigo';
+    await sql(`insert into inventory(user_id,name,unit,qty,min,cost) values
+      ('${uid}','Farinha de trigo','kg',0.1,10,5.20),
+      ('${uid}','Queijo mussarela','kg',8,5,32);
       insert into orders(user_id,customer,items,total,status) values
       ('${uid}','Entregue sem receita','Legado',10,'entregue'),
       ('${uid}','Em preparo','Legado',999,'preparando'),
