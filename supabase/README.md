@@ -2,6 +2,19 @@
 
 ## Fluxo de receitas e entregas (setembro de 2026)
 
+Aplicação no projeto Supabase `ritkjcnhvtdpbofiudex` concluída em **07/09/2026**.
+As quatro migrations abaixo estão instaladas. A conferência das cinco funções
+confirmou que seus corpos correspondem ao código testado localmente, desconsiderando
+apenas comentários e espaços. Os quatro pedidos existentes foram preservados;
+o pedido já entregue recebeu o marcador, sem criar movimentações de estoque.
+
+Validação funcional realizada em banco local descartável: receitas fracionadas,
+isolamento entre usuários, pedidos estruturados, custo de insumos compartilhados,
+entrega com estoque negativo, itens sem receita, rollback por falha técnica e
+concorrência (oito entregas do mesmo pedido e cinco pedidos distintos simultâneos).
+O fluxo completo também foi conferido na interface local. Nenhum pedido de teste
+foi criado no banco de produção.
+
 Após o schema base e a migration de janeiro, aplicar nesta ordem:
 
 1. `migrations/202609050001_recipe_precision.sql` — `qty_used`, proprietário da receita e RLS.
