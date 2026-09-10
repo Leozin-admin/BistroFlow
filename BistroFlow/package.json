@@ -2,6 +2,9 @@
     "name": "bistroflow",
     "version": "1.0.0",
     "type": "module",
+    "scripts": {
+        "test:billing": "node --experimental-vm-modules --test tests/billing.test.js"
+    },
     "dependencies": {
         "stripe": "^17.0.0",
         "@supabase/supabase-js": "^2.45.0"

@@ -146,8 +146,6 @@
   }
 
   function openPlanModal() {
-    const session = Auth.getSession(); // Need the session for userId/email
-
     const plansHTML = Object.entries(PLAN_DATA).map(([id, data]) => {
       // We need to know the current plan to disable the button
       // Since Store.getSubscription is async, we'll handle it inside the click handler of the buttons
@@ -174,20 +172,15 @@
     // Handle subscription clicks
     $$('.btn-sub').forEach(btn => {
       btn.addEventListener('click', async () => {
+        if (btn.disabled) return;
+        btn.disabled = true;
         const planId = btn.dataset.plan;
-        const { user } = await session;
 
         try {
-          const res = await fetch('/api/create-checkout-session', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ plan: planId, userId: user.id, userEmail: user.email })
-          });
-          const { url } = await res.json();
-          if (url) window.location.href = url;
-          else alert('Erro ao gerar sessão de checkout.');
+          window.location.href = await Billing.createCheckout(planId);
         } catch (e) {
-          alert('Erro na conexão: ' + e.message);
+          alert(e.message);
+          btn.disabled = false;
         }
       });
     });
@@ -204,18 +197,14 @@
   }
 
   async function manageSubscription() {
-    const { user } = await Auth.getSession();
+    const button = $('#btnManageSub');
+    if (button?.disabled) return;
+    if (button) button.disabled = true;
     try {
-      const res = await fetch('/api/create-portal-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id })
-      });
-      const { url } = await res.json();
-      if (url) window.location.href = url;
-      else alert('Erro ao gerar sessão do portal.');
+      window.location.href = await Billing.createPortal();
     } catch (e) {
-      alert('Erro na conexão: ' + e.message);
+      alert(e.message);
+      if (button) button.disabled = false;
     }
   }
 
