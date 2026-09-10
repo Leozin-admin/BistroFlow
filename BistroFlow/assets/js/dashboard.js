@@ -818,7 +818,7 @@
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `bistroflow-relatorio-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `na-brasa-relatorio-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
   }
 
@@ -858,7 +858,7 @@
       headStyles: { fillColor: [30, 30, 30] }
     });
 
-    doc.save(`bistroflow-relatorio-${today.toISOString().slice(0, 10)}.pdf`);
+    doc.save(`na-brasa-relatorio-${today.toISOString().slice(0, 10)}.pdf`);
   }
 
   $('#btnExport').addEventListener('click', async () => {

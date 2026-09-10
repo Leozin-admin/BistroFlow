@@ -16,7 +16,7 @@
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js').catch((error) => {
-        console.warn('[BistroFlow] Service worker não registrado:', error);
+        console.warn('[Na Brasa] Service worker não registrado:', error);
       });
     });
   }

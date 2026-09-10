@@ -1,7 +1,7 @@
 /* supabaseClient.js — inicializa o cliente Supabase e expõe em window */
 (function () {
   if (!window.supabase) {
-    console.error('[BistroFlow] SDK do Supabase não foi carregado.');
+    console.error('[Na Brasa] SDK do Supabase não foi carregado.');
     return;
   }
 

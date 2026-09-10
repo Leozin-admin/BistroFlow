@@ -24,7 +24,7 @@ async function sql(query, authenticated = true) {
   });
   return stdout.trim();
 }
-const user = { id: uid, email: 'ui-test@example.invalid', user_metadata: { name: 'Teste', restaurant: 'BistroFlow · Teste local' } };
+const user = { id: uid, email: 'ui-test@example.invalid', user_metadata: { name: 'Teste', restaurant: 'Na Brasa · Teste local' } };
 const authScript = `window.Auth = {getSession:async()=>({user:${JSON.stringify(user)}}),onChange:()=>{},logout:async()=>{}};`;
 const clientScript = `
 const testRequest = async payload => { const r = await fetch('/test-api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});return r.json(); };

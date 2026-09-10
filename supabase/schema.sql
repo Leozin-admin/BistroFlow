@@ -1,5 +1,5 @@
 -- =============================================================
--- BistroFlow — Schema + RLS
+-- Na Brasa — Schema + RLS
 -- Cole tudo isso no SQL Editor do Supabase e rode uma vez.
 -- =============================================================
 
